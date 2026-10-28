@@ -911,9 +911,9 @@ async function hostGame(codigo) {
                 : `<p class="small">Nenhum quiz cadastrado. <a style="color:var(--accent)" href="?adm=quizzes">Cadastrar quiz</a></p>`}
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-              <h1 style="margin:0"><span id="nj">0</span> participantes</h1>
+              <h1 style="margin:0"><span id="nj">0</span> participante${st.jogadores === 1 ? '' : 's'}</h1>
               <div style="text-align:right"><div class="crono" id="crono"></div>
-                <div class="crono-bt"><span class="small" style="opacity:.8;align-self:center">Contagem:</span>
+                <div class="crono-bt"><span class="small" style="opacity:.8;align-self:center" title="Só mostra um relógio no telão; o quiz começa quando você clicar em Começar quiz">⏱ Mostrar contagem para o início:</span>
                   ${[2, 5, 10].map(m => `<button class="btn ghost" onclick="__crono(${m})">${m} min</button>`).join('')}
                   <button class="btn ghost" onclick="__crono(0)">✕</button></div></div></div>
             <div class="chips" id="chips"></div>
