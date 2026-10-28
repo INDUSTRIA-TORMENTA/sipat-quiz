@@ -316,6 +316,7 @@ function playerGame(codigo, me) {
 
   const render = () => {
     if (!st) return;
+    if (st.status === 'lobby') enviando = null; // quiz reiniciado
     const prep = st.status === 'pergunta' && serverNow() < Date.parse(st.inicio_em);
     const respondeu = st.respondeu || enviando === st.idx;
     const key = [st.status, st.idx, prep, respondeu].join('|');
@@ -627,6 +628,12 @@ async function hostGame(codigo) {
   };
   window.__acao = acao;
   window.__tela = t => { tela = t; viewKey = ''; render(); };
+  window.__reiniciar = () => {
+    if (confirm('Reiniciar o quiz?\n\nZera pontos e respostas e volta para a sala de espera. Os participantes continuam conectados.')) acao('reiniciar');
+  };
+  window.__limpar = () => {
+    if (confirm('Remover todos os participantes da sala?\n\nOs celulares voltam para a tela de digitar o nome.')) acao('limpar_participantes');
+  };
   window.__escolher = async id => {
     if (!id) return;
     try { await rpc('sipat_quiz_escolher', { p_codigo: codigo, p_token: token, p_modelo: id }); viewKey = ''; await atualizar(); }
@@ -672,7 +679,8 @@ async function hostGame(codigo) {
   const draw = prep => {
     const topo = `<div class="top"><div class="badge">${esc(st.titulo)}</div>
       ${st.status !== 'lobby' && st.status !== 'fim' ? `<div class="badge">Pergunta ${st.idx + 1} de ${st.total}</div>` : ''}
-      <div class="badge">Código: <b>${esc(codigo)}</b> · ${st.jogadores} na sala</div></div>`;
+      <div style="display:flex;gap:8px;align-items:center"><div class="badge">Código: <b>${esc(codigo)}</b> · ${st.jogadores} na sala</div>
+        <button class="btn ghost" style="width:auto;padding:6px 12px;font-size:14px" onclick="__reiniciar()">↺ Reiniciar quiz</button></div></div>`;
 
     if (st.status === 'lobby') {
       // Tela 2: QR code, escolha do quiz e quem entrou
@@ -690,7 +698,8 @@ async function hostGame(codigo) {
             <h1><span id="nj">0</span> participantes</h1>
             <div class="chips" id="chips"></div>
             <div class="actions" style="justify-content:flex-start">
-              <button class="btn go" style="font-size:22px" ${st.total ? '' : 'disabled title="Escolha o quiz primeiro"'} onclick="__acao('proxima')">Começar quiz ▶</button></div></div>
+              <button class="btn go" style="font-size:22px" ${st.total ? '' : 'disabled title="Escolha o quiz primeiro"'} onclick="__acao('proxima')">Começar quiz ▶</button>
+              ${st.jogadores ? `<button class="btn ghost" style="min-width:0" onclick="__limpar()">Remover participantes</button>` : ''}</div></div>
         </div></div>`;
       if (window.QRCode) new QRCode(document.getElementById('qr'), { text: joinUrl, width: 300, height: 300, correctLevel: QRCode.CorrectLevel.M });
     } else if (st.status === 'pergunta' && prep) {
@@ -748,7 +757,8 @@ async function hostGame(codigo) {
           <div class="blk" style="background:${cores[i]};height:${alt[i]}px;animation-delay:${[1.2, .6, 1.8][i]}s">${i + 1}º</div></div>`).join('')}</div>
         ${r.length > 3 ? `<div style="max-width:1000px;margin:0 auto">${r.slice(3).map(x => `<div class="rk-row rise" style="position:relative;margin:8px 0">
           <span>${x.pos}º</span><span class="rk-nome">${esc(x.nome)}</span><span></span><span class="rk-det">${x.acertos} acertos · ${seg(x.tempo_ms)}</span><span></span><span class="rk-pts">${pts(x.pontos)}</span></div>`).join('')}</div>` : ''}
-        <div class="actions"><button class="btn ghost" onclick="location.href='?adm'">Voltar ao início</button></div></div>`;
+        <div class="actions"><button class="btn light" onclick="__reiniciar()">↺ Reiniciar quiz</button>
+          <button class="btn ghost" onclick="location.href='?adm'">Voltar ao início</button></div></div>`;
       setTimeout(() => { confete(9000); bipe(523, .15); setTimeout(() => bipe(659, .15), 150); setTimeout(() => bipe(784, .3), 300); }, 1800);
     }
   };
@@ -773,6 +783,8 @@ async function hostGame(codigo) {
     const pb = document.getElementById('pb'); if (pb) pb.style.width = (st.jogadores ? 100 * st.respostas / st.jogadores : 0) + '%';
     const chips = document.getElementById('chips');
     if (chips) {
+      const validos = new Set(st.nomes);
+      [...chips.children].forEach(c => { if (!validos.has(c.textContent)) c.remove(); });
       const atuais = new Set([...chips.children].map(c => c.textContent));
       st.nomes.slice().reverse().forEach(n => {
         if (!atuais.has(n)) { const c = document.createElement('span'); c.className = 'chip'; c.textContent = n; chips.prepend(c); }
