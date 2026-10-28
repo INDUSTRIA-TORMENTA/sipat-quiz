@@ -77,12 +77,42 @@
 
   /* estatísticas */
   .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
-  .kpi { border-radius: 16px; padding: 14px; text-align: center; color: #fff; animation: pop .6s cubic-bezier(.2,1.4,.4,1) both; box-shadow: inset 0 -6px 0 rgba(0,0,0,.2); }
-  .kpi .v { font-family: 'Lilita One', sans-serif; font-size: 64px; line-height: 1; }
-  .kpi .l { font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+  .kpi { border-radius: 16px; padding: 14px; text-align: center; background: #fff; color: var(--ink); border-top: 8px solid var(--bg2); animation: pop .6s cubic-bezier(.2,1.4,.4,1) both; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
+  .kpi .v { font-family: 'Lilita One', sans-serif; font-size: 64px; line-height: 1; color: var(--bg2); }
+  .kpi .l { font-weight: 800; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; color: #555; }
   .kpi .nm { font-weight: 800; font-size: 20px; margin-top: 4px; word-break: break-word; }
-  .kpi.ok { background: var(--ok); color: #fff; } .kpi.err { background: var(--bad); } .kpi.na { background: #5b6470; }
-  .kpi.t { background: #fff; color: var(--ink); } .kpi.t .v { font-size: 48px; color: var(--bg2); }
+  .kpi.ok { border-color: var(--ok); } .kpi.ok .v { color: var(--ok); }
+  .kpi.err { border-color: var(--bad); } .kpi.err .v { color: var(--bad); }
+  .kpi.na { border-color: #8a929c; } .kpi.na .v { color: #6b7380; }
+  .kpi.t { border-color: var(--accent); } .kpi.t .v { font-size: 46px; }
+  .bloco2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; margin-bottom: 8px; }
+  .bloco2 .tempos { display: grid; gap: 10px; }
+  .bloco2 .tempos .kpi { display: grid; grid-template-columns: 1fr auto; align-items: center; text-align: left; padding: 10px 18px; border-top: 0; border-left: 8px solid var(--accent); }
+  .bloco2 .tempos .kpi .v { font-size: 40px; grid-row: span 2; }
+  .porletra { background: #fff; color: var(--ink); border-radius: 16px; padding: 14px 18px; box-shadow: 0 8px 20px rgba(0,0,0,.25); animation: pop .6s .2s both; }
+  .porletra .t { font-weight: 800; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 8px; }
+  .porletra .cols { display: flex; gap: 22px; align-items: flex-end; justify-content: center; height: 210px; }
+  .porletra .c { width: 90px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .porletra .c b { font-family: 'Lilita One', sans-serif; font-size: 34px; font-weight: 400; color: #6b7380; }
+  .porletra .c i { display: block; width: 100%; height: 6px; background: #c9ced6; border-radius: 10px 10px 0 0; transition: height 1.3s cubic-bezier(.2,1,.3,1); }
+  .porletra .c span { margin-top: 6px; width: 44px; height: 44px; border-radius: 50%; background: #e7eaee; display: flex; align-items: center; justify-content: center; font-family: 'Lilita One', sans-serif; font-size: 24px; }
+  .porletra .c.certa b { color: var(--ok); } .porletra .c.certa i { background: var(--ok); } .porletra .c.certa span { background: var(--ok); color: #fff; }
+
+  /* pódio montado na revelação */
+  .stage { display: flex; justify-content: center; align-items: flex-end; gap: 18px; margin-top: 50px; }
+  .slot { width: 260px; text-align: center; }
+  .slot.pend { visibility: hidden; }
+  .slot.land { animation: pop .7s cubic-bezier(.2,1.4,.4,1) both; }
+  .slot .nm { font-family: 'Lilita One', sans-serif; font-size: 30px; line-height: 1.05; word-break: break-word; margin-bottom: 4px; }
+  .slot .pt { font-weight: 800; opacity: .9; margin-bottom: 8px; }
+  .slot .blk { border-radius: 14px 14px 0 0; display: flex; justify-content: center; padding-top: 14px; font-family: 'Lilita One', sans-serif; font-size: 64px; color: var(--ink); box-shadow: inset 0 -10px 0 rgba(0,0,0,.12); }
+  .slot.s1 .blk { height: 250px; background: linear-gradient(160deg, #fff3a6, #ffd700 50%, #d9a400); }
+  .slot.s2 .blk { height: 185px; background: linear-gradient(160deg, #ffffff, #d4d9e1); }
+  .slot.s3 .blk { height: 140px; background: linear-gradient(160deg, #ffe0c0, #d98d4c); }
+  .spot { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(5,25,12,.75); transition: background .9s; }
+  .spot .reveal { transition: transform .9s cubic-bezier(.5,0,.3,1), opacity .9s; }
+  .spot .parab { font-family: 'Lilita One', sans-serif; font-size: 56px; color: var(--accent); margin-top: 18px; animation: pop .7s .5s both; text-shadow: 0 4px 0 rgba(0,0,0,.3); }
+  .spot.sai { background: transparent; } .spot.sai .parab { opacity: 0; transition: opacity .3s; }
   .hbars { display: grid; gap: 10px; margin-bottom: 16px; }
   .hb { display: grid; grid-template-columns: 48px 1fr 90px; align-items: center; gap: 12px; background: rgba(255,255,255,.08); border-radius: 12px; padding: 8px 12px; }
   .hb .sh { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Lilita One', sans-serif; font-size: 26px; color: #fff; }
@@ -105,9 +135,21 @@
   .lista div b { flex: none; min-width: 44px; text-align: center; background: var(--accent); color: var(--ink); border-radius: 8px; font-family: 'Lilita One', sans-serif; font-weight: 400; }
   .lista div span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .lista div small { opacity: .8; }
-  .o0 { background: var(--a); } .o1 { background: var(--b); } .o2 { background: var(--c); } .o3 { background: var(--d); }
-  .opt.fade { opacity: .3; }
-  .opt.right { outline: 6px solid #fff; animation: pulse 1s ease-in-out 2; }
+  /* visual empresarial: alternativas neutras, destaque só para a certa */
+  .opt { background: rgba(255,255,255,.08); border: 2px solid rgba(255,255,255,.2); box-shadow: none; }
+  .opt .sh { background: var(--accent); color: #0b3d1c; }
+  .opt.fade { opacity: .35; }
+  .opt.right { background: var(--ok); border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,204,0,.35); animation: pulse 1s ease-in-out 2; }
+  .pl .opt { background: #fff; color: var(--ink); border: 0; box-shadow: inset 0 -4px 0 rgba(0,0,0,.12); }
+  .pl .opt .sh { background: var(--bg2); color: #fff; }
+
+  /* cabeçalho do telão */
+  .topbar { display: flex; align-items: center; gap: 18px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.12); border-radius: 18px; padding: 8px 16px; margin-bottom: 16px; }
+  .topbar .tlogo { height: 70px; flex: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,.4)); }
+  .topbar .ttl { flex: 1; min-width: 0; }
+  .topbar .ttl small { display: block; font-size: 13px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); }
+  .topbar .ttl div { font-family: 'Lilita One', sans-serif; font-size: 32px; line-height: 1.1; }
+  .topbar .tr { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 
   /* animações */
   @keyframes pop { 0% { transform: scale(.3); opacity: 0; } 70% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
@@ -187,7 +229,9 @@
   .lib button { padding: 8px 12px; font-size: 14px; width: auto; }
   canvas.confete { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
   @media (max-width: 800px) {
-    .lobby, .mid, .stats, .kpis { grid-template-columns: 1fr; text-align: center; }
+    .lobby, .mid, .stats, .kpis, .bloco2 { grid-template-columns: 1fr; text-align: center; }
+    .topbar { flex-wrap: wrap; } .topbar .tlogo { height: 44px; } .topbar .ttl div { font-size: 20px; }
+    .slot { width: 110px; } .slot .nm { font-size: 16px; } .slot .blk { font-size: 34px; }
     .masc img { width: 110px; } .masc .fala { font-size: 18px; } .masc.big img { width: 150px; } .masc.big .fala { font-size: 22px; }
     .reveal .quem { font-size: 36px; } .reveal .lugar { font-size: 56px; } .selo { display: none; }
     .qtext { font-size: 22px; } .opt { font-size: 17px; min-height: 70px; }
@@ -668,7 +712,7 @@ async function hostGame(codigo) {
   await loadQr().catch(() => {});
   const joinUrl = baseUrl + '?c=' + codigo;
   // Depois que a pergunta fecha: 'resposta' -> 'stats' -> 'rank'
-  let st = null, viewKey = '', tela = 'resposta', ocupado = false, bipUlt = null, modelos = [];
+  let st = null, viewKey = '', tela = 'resposta', ocupado = false, bipUlt = null, modelos = [], ultRv = null;
 
   const acao = async a => {
     if (ocupado) return; ocupado = true;
@@ -705,7 +749,7 @@ async function hostGame(codigo) {
     `<div class="opt o${i} ${mostrarCerta ? (i === q.correta ? 'right' : 'fade') : 'pop'}" style="animation-delay:${i * .1}s"><span class="sh">${SHAPES[i]}</span><span>${esc(o)}</span>${mostrarCerta && i === q.correta ? '<span style="margin-left:auto">✔</span>' : ''}</div>`).join('')}</div>`;
 
   const masc = (fala, cls = '') => `<div class="masc ${cls}"><img src="img/tormentinha.png" alt="Tormentinha"><div class="fala">${fala}</div></div>`;
-  const selo = '<img class="selo" src="img/logo-sipat.png" alt="">';
+  const selo = ''; // a marca SIPAT fica no cabeçalho
 
   // Frase do Tormentinha no ranking
   const falaRanking = () => {
@@ -745,10 +789,11 @@ async function hostGame(codigo) {
   }, 900);
 
   const draw = prep => {
-    const topo = `<div class="top"><div class="badge">${esc(st.titulo)}</div>
-      ${st.status !== 'lobby' && st.status !== 'fim' ? `<div class="badge">Pergunta ${st.idx + 1} de ${st.total}</div>` : ''}
-      <div style="display:flex;gap:8px;align-items:center"><div class="badge">Código: <b>${esc(codigo)}</b> · ${st.jogadores} na sala</div>
-        <button class="btn ghost" style="width:auto;padding:6px 12px;font-size:14px" onclick="__reiniciar()">↺ Reiniciar quiz</button></div></div>`;
+    const topo = `<div class="topbar"><img class="tlogo" src="img/logo-sipat.png" alt="SIPAT">
+      <div class="ttl"><small>SIPAT 2026 · Sementes Tormenta · Palestra</small><div>${esc(st.titulo)}</div></div>
+      <div class="tr">${st.status !== 'lobby' && st.status !== 'fim' ? `<div class="badge" style="font-size:18px">Pergunta ${st.idx + 1} de ${st.total}</div>` : ''}
+        <div class="badge">Código <b>${esc(codigo)}</b> · ${st.jogadores} na sala</div>
+        <button class="btn ghost" style="width:auto;padding:6px 12px;font-size:14px" onclick="__reiniciar()">↺ Reiniciar</button></div></div>`;
 
     if (st.status === 'lobby') {
       // Tela 2: QR code, escolha do quiz e quem entrou
@@ -810,19 +855,18 @@ async function hostGame(codigo) {
           <div class="kpi err" style="animation-delay:.15s"><div class="l">✖ Erros</div><div class="v" data-n="${er}">0</div></div>
           <div class="kpi na" style="animation-delay:.3s"><div class="l">⏳ Não responderam</div><div class="v" data-n="${na}">0</div></div>
         </div>
-        <div class="hbars">${d.map((n, i) => `<div class="hb ${i === st.pergunta.correta ? 'certa' : ''}">
-          <div class="sh o${i}">${LETRAS[i]}</div>
-          <div><div class="tx">${esc(st.pergunta.opcoes[i])}${i === st.pergunta.correta ? ' ✔' : ''}</div><div class="tr"><i class="o${i}" data-w="${100 * n / tot}"></i></div></div>
-          <div class="n" data-n="${n}">0</div></div>`).join('')}</div>
-        <div class="kpis">
-          <div class="kpi t" style="animation-delay:.5s"><div class="l">⚡ Mais rápida</div><div class="v">${s.rapido ? seg(s.rapido.ms) : '–'}</div><div class="nm">${s.rapido ? esc(s.rapido.nome) : 'ninguém acertou'}</div></div>
-          <div class="kpi t" style="animation-delay:.65s"><div class="l">⏱️ Tempo médio</div><div class="v">${s.media_ms != null ? seg(s.media_ms) : '–'}</div><div class="nm">de quem acertou</div></div>
-          <div class="kpi t" style="animation-delay:.8s"><div class="l">🐢 Mais lenta</div><div class="v">${s.lento ? seg(s.lento.ms) : '–'}</div><div class="nm">${s.lento ? esc(s.lento.nome) : '–'}</div></div>
-        </div>
+        <div class="bloco2">
+          <div class="porletra"><div class="t">Pessoas por alternativa</div>
+            <div class="cols">${d.map((n, i) => `<div class="c ${i === st.pergunta.correta ? 'certa' : ''}"><b data-n="${n}">0</b><i data-h="${(n / tot) * 150 + 6}"></i><span>${LETRAS[i]}</span></div>`).join('')}</div></div>
+          <div class="tempos">
+            <div class="kpi t" style="animation-delay:.4s"><div class="l">⚡ Mais rápida</div><div class="v">${s.rapido ? seg(s.rapido.ms) : '–'}</div><div class="nm">${s.rapido ? esc(s.rapido.nome) : 'ninguém acertou'}</div></div>
+            <div class="kpi t" style="animation-delay:.55s"><div class="l">⏱️ Tempo médio</div><div class="v">${s.media_ms != null ? seg(s.media_ms) : '–'}</div><div class="nm">de quem acertou</div></div>
+            <div class="kpi t" style="animation-delay:.7s"><div class="l">🐢 Mais lenta</div><div class="v">${s.lento ? seg(s.lento.ms) : '–'}</div><div class="nm">${s.lento ? esc(s.lento.nome) : '–'}</div></div>
+          </div></div>
         <div class="actions"><button class="btn light" onclick="__tela('resposta')">◀ Resposta</button>
           <button class="btn go" style="font-size:22px" onclick="__tela('rank')">Ver ranking 🏆</button></div></div>${selo}`;
       document.querySelectorAll('[data-n]').forEach(el => contar(el, 0, +el.dataset.n, 1200));
-      setTimeout(() => document.querySelectorAll('.hb .tr i').forEach(el => el.style.width = el.dataset.w + '%'), 60);
+      setTimeout(() => document.querySelectorAll('.porletra i').forEach(el => el.style.height = el.dataset.h + 'px'), 60);
       if (ac > 0) bipe(1200, .2);
     } else if (st.status === 'resultado') {
       // Tela 5: ranking animado com o Tormentinha
@@ -849,17 +893,22 @@ async function hostGame(codigo) {
           <h1 class="pop" style="font-size:64px">Quiz finalizado! 🎉</h1>
           ${masc('Rufem os tambores… 🥁<br>Vamos conhecer os <b>grandes vencedores</b>!', 'big')}
           <div class="actions">${btn('Revelar o 3º lugar 🥉')}</div></div>`;
-      } else if (rv === 1) {
-        corpo = `<div class="center" style="min-height:70vh">${card(3)}
-          <div class="actions" style="margin-top:30px">${btn('Revelar o 2º lugar 🥈')}</div></div>`;
-      } else if (rv === 2) {
-        corpo = `<div class="center" style="min-height:70vh"><div class="mini">${card(3)}</div>${card(2)}
-          <div class="actions" style="margin-top:30px">${btn('Revelar o CAMPEÃO 🏆')}</div></div>`;
-      } else if (rv === 3) {
-        corpo = `<div class="center" style="min-height:70vh"><div class="mini">${card(2)}${card(3)}</div>
-          <div style="display:flex;align-items:center;gap:20px"><img class="presente" src="img/presente.png" alt="">${card(1)}<img class="presente" src="img/presente.png" alt=""></div>
-          <div style="margin-top:16px">${masc(`Parabéns, <b>${cl[0] ? esc(cl[0].nome) : ''}</b>! 🏆`)}</div>
-          <div class="actions">${btn('Ver classificação completa 📋', 'light')}</div></div>`;
+      } else if (rv <= 3) {
+        // Pódio sendo montado: o novo colocado aparece grande ("Parabéns!"), encolhe e desce para o seu degrau
+        const novo = 4 - rv, animar = ultRv !== null && rv > ultRv;
+        const slot = p => {
+          const x = cl[p - 1], visto = rv >= 4 - p;
+          return `<div class="slot s${p} ${!visto || (animar && p === novo) ? 'pend' : ''}" id="slot${p}">
+            <div class="nm">${visto && x ? esc(x.nome) : '?'}</div>
+            <div class="pt">${visto && x ? `${pts(x.pontos)} pts · ${x.acertos} acerto${x.acertos === 1 ? '' : 's'} · ${seg(x.tempo_ms)}` : '&nbsp;'}</div>
+            <div class="blk">${p}º</div></div>`;
+        };
+        const prox = rv === 1 ? 'Revelar o 2º lugar 🥈' : rv === 2 ? 'Revelar o CAMPEÃO 🏆' : 'Ver classificação completa 📋';
+        corpo = `<h1 class="pop" style="text-align:center;font-size:48px;margin:6px 0">🏆 Os vencedores</h1>
+          <div class="stage">${[2, 1, 3].map(slot).join('')}</div>
+          ${rv === 3 ? `<div id="fala1" style="display:flex;justify-content:center;margin-top:14px;${animar ? 'visibility:hidden' : ''}">${masc(`Parabéns, <b>${cl[0] ? esc(cl[0].nome) : ''}</b>! Você é o campeão! 🏆`)}</div>` : ''}
+          <div class="actions">${btn(prox, rv === 3 ? 'light' : 'go')}</div>
+          ${animar ? `<div class="spot" id="spot">${card(novo)}<div class="parab">Parabéns! 👏</div></div>` : ''}`;
       } else {
         corpo = `<h1 class="pop" style="text-align:center;font-size:48px">📋 Classificação final — ${cl.length} participantes</h1>
           <div class="mini">${card(1)}${card(2)}${card(3)}</div>
@@ -868,10 +917,32 @@ async function hostGame(codigo) {
             <button class="btn ghost" onclick="location.href='?adm'">Voltar ao início</button></div>`;
       }
       $app.innerHTML = `<div class="wrap">${topo}${corpo}</div>${selo}`;
-      if (rv === 1 || rv === 2) tambor();
-      if (rv === 3) { tambor(); setTimeout(() => { confete(10000); bipe(523, .15); setTimeout(() => bipe(659, .15), 150); setTimeout(() => bipe(784, .4), 300); }, 1300); }
+      const animou = ultRv !== null && rv > ultRv && rv >= 1 && rv <= 3;
+      ultRv = rv;
+      if (animou) {
+        tambor();
+        if (rv === 3) setTimeout(() => { confete(10000); bipe(523, .15); setTimeout(() => bipe(659, .15), 150); setTimeout(() => bipe(784, .4), 300); }, 1300);
+        setTimeout(() => descerParaPodio(4 - rv), rv === 3 ? 5500 : 4500);
+      }
       if (rv === 4) rolarLista();
     }
+  };
+
+  // O cartão grande encolhe e vai até o degrau do pódio
+  const descerParaPodio = p => {
+    const spot = document.getElementById('spot'), slot = document.getElementById('slot' + p);
+    if (!spot || !slot) return;
+    const card = spot.querySelector('.reveal'), a = card.getBoundingClientRect(), b = slot.getBoundingClientRect();
+    const s = Math.min(1, b.width / a.width);
+    spot.classList.add('sai');
+    card.style.animation = 'none'; void card.offsetWidth; // solta a animação de entrada para a transição funcionar
+    card.style.transform = `translate(${b.left + b.width / 2 - (a.left + a.width / 2)}px, ${b.top + 40 - (a.top + a.height / 2)}px) scale(${s})`;
+    card.style.opacity = '0';
+    setTimeout(() => {
+      spot.remove(); slot.classList.remove('pend'); slot.classList.add('land');
+      const f = document.getElementById('fala1'); if (f) f.style.visibility = 'visible';
+      bipe(784, .15);
+    }, 900);
   };
 
   // Lista longa: rola devagar sozinha para todos acharem o nome
