@@ -19,7 +19,7 @@
     background: url(img/fundo.jpg) center / cover fixed, radial-gradient(circle at 20% 0%, var(--bg2), var(--bg) 70%) fixed;
     color: #fff; min-height: 100vh; overflow-x: hidden;
   }
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 16px; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 16px; position: relative; z-index: 1; }
   .center { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 16px; }
   .card { background: var(--card); color: var(--ink); border-radius: 16px; padding: 24px; width: 100%; max-width: 440px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
   .card.wide { max-width: 1000px; }
@@ -61,9 +61,50 @@
   h1, .qtext, .code, .huge, .big { font-family: 'Lilita One', 'Segoe UI', sans-serif; font-weight: 400; letter-spacing: .5px; }
 
   /* opções */
-  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
-  .opt { color: #fff; border-radius: 12px; padding: 18px; font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 12px; text-align: left; min-height: 90px; box-shadow: inset 0 -6px 0 rgba(0,0,0,.2); }
-  .opt .sh { font-size: 30px; flex: none; }
+  .opts { display: grid; grid-template-columns: 1fr; gap: 12px; width: 100%; }
+  .opt { color: #fff; border-radius: 14px; padding: 14px 20px; font-size: 26px; font-weight: 800; display: flex; align-items: center; gap: 16px; text-align: left; min-height: 76px; box-shadow: inset 0 -6px 0 rgba(0,0,0,.2); width: 100%; }
+  .opt .sh { flex: none; width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,.95); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 28px; }
+
+  /* mascote Tormentinha */
+  @keyframes bob { 50% { transform: translateY(-10px) rotate(-3deg); } }
+  .masc { display: flex; align-items: center; gap: 4px; }
+  .masc img { width: 190px; flex: none; animation: bob 2.2s ease-in-out infinite; filter: drop-shadow(0 8px 10px rgba(0,0,0,.35)); }
+  .masc .fala { position: relative; background: #fff; color: var(--ink); border-radius: 20px; padding: 16px 22px; font-family: 'Lilita One', sans-serif; font-size: 28px; line-height: 1.15; animation: pop .6s .3s cubic-bezier(.2,1.4,.4,1) both; box-shadow: 0 8px 20px rgba(0,0,0,.3); }
+  .masc .fala::before { content: ''; position: absolute; left: -18px; top: 50%; margin-top: -12px; border: 12px solid transparent; border-right: 18px solid #fff; border-left: 0; }
+  .masc .fala b { color: var(--d); }
+  .masc.big img { width: 300px; } .masc.big .fala { font-size: 40px; }
+  .selo { position: fixed; right: 18px; bottom: 12px; width: 150px; opacity: .9; pointer-events: none; z-index: 0; }
+
+  /* estatísticas */
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
+  .kpi { border-radius: 16px; padding: 14px; text-align: center; color: #fff; animation: pop .6s cubic-bezier(.2,1.4,.4,1) both; box-shadow: inset 0 -6px 0 rgba(0,0,0,.2); }
+  .kpi .v { font-family: 'Lilita One', sans-serif; font-size: 64px; line-height: 1; }
+  .kpi .l { font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+  .kpi .nm { font-weight: 800; font-size: 20px; margin-top: 4px; word-break: break-word; }
+  .kpi.ok { background: var(--ok); color: #fff; } .kpi.err { background: var(--bad); } .kpi.na { background: #5b6470; }
+  .kpi.t { background: #fff; color: var(--ink); } .kpi.t .v { font-size: 48px; color: var(--bg2); }
+  .hbars { display: grid; gap: 10px; margin-bottom: 16px; }
+  .hb { display: grid; grid-template-columns: 48px 1fr 90px; align-items: center; gap: 12px; background: rgba(255,255,255,.08); border-radius: 12px; padding: 8px 12px; }
+  .hb .sh { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Lilita One', sans-serif; font-size: 26px; color: #fff; }
+  .hb .tx { font-weight: 800; font-size: 18px; margin-bottom: 6px; }
+  .hb .tr { height: 18px; background: rgba(255,255,255,.12); border-radius: 9px; overflow: hidden; }
+  .hb .tr i { display: block; height: 100%; width: 0; border-radius: 9px; transition: width 1.4s cubic-bezier(.2,1,.3,1); }
+  .hb .n { font-family: 'Lilita One', sans-serif; font-size: 34px; text-align: right; }
+  .hb.certa { background: rgba(31,163,74,.35); outline: 3px solid #fff; }
+
+  /* revelação final */
+  .reveal { border-radius: 26px; padding: 26px 40px; text-align: center; color: var(--ink); min-width: min(620px, 90vw); box-shadow: 0 20px 50px rgba(0,0,0,.45); animation: pop .9s cubic-bezier(.2,1.4,.4,1) both; }
+  .reveal .lugar { font-family: 'Lilita One', sans-serif; font-size: 90px; line-height: 1; }
+  .reveal .quem { font-family: 'Lilita One', sans-serif; font-size: 64px; line-height: 1.05; margin: 8px 0; word-break: break-word; }
+  .reveal .det { font-size: 24px; font-weight: 800; }
+  .reveal.p1 { background: linear-gradient(160deg, #fff3a6, #ffd700 50%, #e0a800); } .reveal.p2 { background: linear-gradient(160deg, #fff, #d9dee6); } .reveal.p3 { background: linear-gradient(160deg, #ffe0c0, #e39b5c); }
+  .mini { display: flex; gap: 14px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .mini .reveal { min-width: 0; padding: 10px 22px; animation: none; } .mini .reveal .lugar { font-size: 34px; } .mini .reveal .quem { font-size: 26px; } .mini .reveal .det { font-size: 15px; }
+  .lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px 14px; max-height: 52vh; overflow: hidden; align-content: start; }
+  .lista div { display: flex; gap: 10px; align-items: center; background: rgba(255,255,255,.1); border-radius: 10px; padding: 6px 10px; margin-bottom: 6px; font-weight: 800; font-size: 18px; animation: rise .5s both; }
+  .lista div b { flex: none; min-width: 44px; text-align: center; background: var(--accent); color: var(--ink); border-radius: 8px; font-family: 'Lilita One', sans-serif; font-weight: 400; }
+  .lista div span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lista div small { opacity: .8; }
   .o0 { background: var(--a); } .o1 { background: var(--b); } .o2 { background: var(--c); } .o3 { background: var(--d); }
   .opt.fade { opacity: .3; }
   .opt.right { outline: 6px solid #fff; animation: pulse 1s ease-in-out 2; }
@@ -79,7 +120,8 @@
   /* celular */
   .pl-q { font-size: 20px; font-weight: 800; margin: 8px 0 14px; }
   .pl .opts { gap: 10px; }
-  .pl .opt { font-size: 18px; min-height: 110px; padding: 14px; }
+  .pl .opt { font-size: 18px; min-height: 72px; padding: 12px 14px; }
+  .pl .opt .sh { width: 38px; height: 38px; font-size: 22px; }
   .bar { height: 10px; background: rgba(255,255,255,.2); border-radius: 6px; overflow: hidden; width: 100%; margin: 8px 0; }
   .bar > i { display: block; height: 100%; background: var(--accent); transition: width .2s linear; }
   .big { font-size: 72px; font-weight: 900; line-height: 1; }
@@ -145,7 +187,9 @@
   .lib button { padding: 8px 12px; font-size: 14px; width: auto; }
   canvas.confete { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
   @media (max-width: 800px) {
-    .lobby, .mid, .stats { grid-template-columns: 1fr; text-align: center; }
+    .lobby, .mid, .stats, .kpis { grid-template-columns: 1fr; text-align: center; }
+    .masc img { width: 110px; } .masc .fala { font-size: 18px; } .masc.big img { width: 150px; } .masc.big .fala { font-size: 22px; }
+    .reveal .quem { font-size: 36px; } .reveal .lugar { font-size: 56px; } .selo { display: none; }
     .qtext { font-size: 22px; } .opt { font-size: 17px; min-height: 70px; }
     .dist .col { width: 60px; } .podium .p { width: 105px; } .podium .p .nm { font-size: 15px; }
     .code { font-size: 44px; } .brand:not(.sm) { --w: 330px; }
@@ -160,8 +204,8 @@
 // ---------- Configuração ----------
 const SB_URL = 'https://pxmlqjeqptppgcctptuh.supabase.co';
 const SB_KEY = 'sb_publishable_kxz8BAAwN4IIxd9BiRIdvw_a6qJbIoF';
-const SHAPES = ['▲', '◆', '●', '■'];
 const LETRAS = ['A', 'B', 'C', 'D'];
+const SHAPES = LETRAS; // marcador de cada alternativa (letra dentro do círculo)
 
 // ---------- Utilidades ----------
 const $app = document.getElementById('app');
@@ -319,7 +363,7 @@ function playerGame(codigo, me) {
     if (st.status === 'lobby') enviando = null; // quiz reiniciado
     const prep = st.status === 'pergunta' && serverNow() < Date.parse(st.inicio_em);
     const respondeu = st.respondeu || enviando === st.idx;
-    const key = [st.status, st.idx, prep, respondeu].join('|');
+    const key = [st.status, st.idx, prep, respondeu, st.revelado >= 4].join('|');
     if (key !== viewKey) { viewKey = key; draw(prep, respondeu); }
     tick();
   };
@@ -361,6 +405,12 @@ function playerGame(codigo, me) {
         <p class="rise" style="font-size:22px;margin-top:24px;animation-delay:.5s">Você está em <b>${st.posicao}º lugar</b><br>${pts(st.pontos)} pontos</p>
         <p class="small" style="opacity:.8">Aguarde a próxima pergunta</p></div>`;
       if (ok) contar(document.getElementById('gan'), 0, st.ganhou, 1000);
+    } else if (st.status === 'fim' && !(st.revelado >= 4)) {
+      // suspense: a colocação só aparece depois que o telão revelar o pódio
+      $app.innerHTML = `${head}<div class="full">
+        <img src="img/tormentinha.png" alt="" style="width:170px;animation:bob 2.2s ease-in-out infinite">
+        <h1 class="pop" style="margin:16px 0;font-size:38px">Quiz finalizado! 🎉</h1>
+        <p class="rise" style="font-size:22px">👀 Olhe para o telão:<br>vamos revelar os vencedores!</p></div>`;
     } else if (st.status === 'fim') {
       const medal = ['🥇', '🥈', '🥉'][st.posicao - 1] || '🎉';
       $app.innerHTML = `${head}<div class="full">
@@ -617,12 +667,13 @@ async function hostGame(codigo) {
   }
   await loadQr().catch(() => {});
   const joinUrl = baseUrl + '?c=' + codigo;
-  let st = null, viewKey = '', tela = 'stats', ocupado = false, bipUlt = null, modelos = [];
+  // Depois que a pergunta fecha: 'resposta' -> 'stats' -> 'rank'
+  let st = null, viewKey = '', tela = 'resposta', ocupado = false, bipUlt = null, modelos = [];
 
   const acao = async a => {
     if (ocupado) return; ocupado = true;
     bipe(660, .05);
-    try { await rpc('sipat_quiz_host_acao', { p_codigo: codigo, p_token: token, p_acao: a }); tela = 'stats'; await atualizar(); }
+    try { await rpc('sipat_quiz_host_acao', { p_codigo: codigo, p_token: token, p_acao: a }); tela = 'resposta'; await atualizar(); }
     catch (e) { alert(e.message); }
     ocupado = false;
   };
@@ -645,13 +696,30 @@ async function hostGame(codigo) {
   const render = () => {
     if (!st) return;
     const prep = st.status === 'pergunta' && serverNow() < Date.parse(st.inicio_em);
-    const key = [st.status, st.idx, prep, tela, st.modelo_id].join('|');
+    const key = [st.status, st.idx, prep, tela, st.modelo_id, st.revelado].join('|');
     if (key !== viewKey) { viewKey = key; draw(prep); }
     tick();
   };
 
   const opcoesHtml = (q, mostrarCerta) => `<div class="opts">${q.opcoes.map((o, i) =>
     `<div class="opt o${i} ${mostrarCerta ? (i === q.correta ? 'right' : 'fade') : 'pop'}" style="animation-delay:${i * .1}s"><span class="sh">${SHAPES[i]}</span><span>${esc(o)}</span>${mostrarCerta && i === q.correta ? '<span style="margin-left:auto">✔</span>' : ''}</div>`).join('')}</div>`;
+
+  const masc = (fala, cls = '') => `<div class="masc ${cls}"><img src="img/tormentinha.png" alt="Tormentinha"><div class="fala">${fala}</div></div>`;
+  const selo = '<img class="selo" src="img/logo-sipat.png" alt="">';
+
+  // Frase do Tormentinha no ranking
+  const falaRanking = () => {
+    const r = st.ranking, lider = r[0];
+    if (!lider || !lider.pontos) return 'Ninguém pontuou ainda… bora acelerar! ⚡';
+    if (st.idx === 0) return `<b>${esc(lider.nome)}</b> saiu na frente! 🚀`;
+    if (lider.pos_ant !== 1) return `Virada! <b>${esc(lider.nome)}</b> assumiu a liderança! 🔥`;
+    const sub = r.filter(x => x.pos_ant - x.pos >= 2).sort((a, b) => (b.pos_ant - b.pos) - (a.pos_ant - a.pos))[0];
+    if (sub) return `<b>${esc(sub.nome)}</b> subiu ${sub.pos_ant - sub.pos} posições! 📈`;
+    return `<b>${esc(lider.nome)}</b> segue na liderança! 👑`;
+  };
+
+  // Rufar de tambores para a revelação final
+  const tambor = () => { for (let i = 0; i < 22; i++) setTimeout(() => bipe(90 + Math.random() * 40, .05), i * 55); setTimeout(() => bipe(880, .4), 1300); };
 
   const proximaBtn = () => st.idx + 1 >= st.total
     ? `<button class="btn go" onclick="__acao('proxima')">Resultado final 🏆</button>`
@@ -718,49 +786,107 @@ async function hostGame(codigo) {
             <div class="bar"><i id="pb" style="width:0"></i></div></div>
           <button class="btn warn" style="width:auto" onclick="__acao('encerrar')">Finalizar pergunta ⏹</button></div>
         ${opcoesHtml(st.pergunta, false)}</div>`;
-    } else if (st.status === 'resultado' && tela === 'stats') {
-      // Tela 4: quantos acertaram, mais rápido, mais lento e média
-      const d = st.distribuicao || [], max = Math.max(1, ...d), s = st.stats || {};
-      const tot = d.reduce((a, b) => a + b, 0), perc = st.jogadores ? Math.round(100 * (s.acertos || 0) / st.jogadores) : 0;
+    } else if (st.status === 'resultado' && tela === 'resposta') {
+      // Tela 4a: a pergunta com a resposta certa
+      const c = st.pergunta.correta;
       $app.innerHTML = `<div class="wrap">${topo}
-        <div class="qtext" style="font-size:26px;padding:14px">${esc(st.pergunta.texto)}</div>
-        <div class="stats">
-          <div class="stat main"><div class="ic">🎯</div><div class="v"><span id="sa">0</span> <span style="font-size:22px">de ${st.jogadores}</span></div><div class="l" style="color:#333">acertaram (${perc}%)</div></div>
-          <div class="stat" style="animation-delay:.25s"><div class="ic">⚡</div><div class="l">Mais rápido</div><div class="v">${s.rapido ? seg(s.rapido.ms) : '–'}</div><div class="nm">${s.rapido ? esc(s.rapido.nome) : 'ninguém acertou'}</div></div>
-          <div class="stat" style="animation-delay:.5s"><div class="ic">⏱️</div><div class="l">Tempo médio</div><div class="v">${s.media_ms != null ? seg(s.media_ms) : '–'}</div><div class="nm">de quem acertou</div></div>
-          <div class="stat" style="animation-delay:.75s"><div class="ic">🐢</div><div class="l">Mais lento</div><div class="v">${s.lento ? seg(s.lento.ms) : '–'}</div><div class="nm">${s.lento ? esc(s.lento.nome) : '–'}</div></div>
-        </div>
-        <div class="dist">${d.map((n, i) => `<div class="col"><b class="cnt" data-n="${n}">0</b><i class="o${i}" data-h="${(n / max) * 170 + 6}" style="${i === st.pergunta.correta ? '' : 'opacity:.35'}"></i>
-          <div class="lb">${SHAPES[i]}${i === st.pergunta.correta ? ' ✔' : ''}</div></div>`).join('')}</div>
+        <div class="qtext">${esc(st.pergunta.texto)}</div>
         ${opcoesHtml(st.pergunta, true)}
-        <div class="actions">
-          <button class="btn light" onclick="__tela('rank')">Ver ranking 🏆</button>
-          ${proximaBtn()}</div></div>`;
-      contar(document.getElementById('sa'), 0, s.acertos || 0, 1200);
-      if ((s.acertos || 0) > 0) bipe(1200, .2);
-      setTimeout(() => document.querySelectorAll('.dist i').forEach(el => el.style.height = el.dataset.h + 'px'), 50);
-      document.querySelectorAll('.dist .cnt').forEach(el => contar(el, 0, +el.dataset.n, 1200));
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:16px;flex-wrap:wrap">
+          ${masc(`A resposta certa é a <b>letra ${LETRAS[c]}</b>! ✅`)}
+          <div class="actions" style="margin:0"><button class="btn go" style="font-size:22px" onclick="__tela('stats')">Ver estatísticas 📊</button></div></div></div>${selo}`;
+      bipe(1046, .25);
+    } else if (st.status === 'resultado' && tela === 'stats') {
+      // Tela 4b: acertos, erros, respostas por alternativa, mais rápida, mais lenta e média
+      const d = st.distribuicao || [], s = st.stats || {}, tot = Math.max(1, d.reduce((a, b) => a + b, 0));
+      const ac = s.acertos || 0, er = s.erros || 0, na = Math.max(0, st.jogadores - ac - er);
+      const taxa = st.jogadores ? ac / st.jogadores : 0;
+      const fala = !st.jogadores ? 'Cadê a galera? 😅' : taxa >= .8 ? 'Mandaram muito bem, galera! 👏' : taxa >= .5 ? 'Boa! A maioria acertou! 💪' : taxa > 0 ? 'Essa foi difícil, hein? 🤔' : 'Ninguém acertou! Presta atenção na palestra! 😱';
+      $app.innerHTML = `<div class="wrap">${topo}
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px">
+          <h1 class="pop" style="font-size:46px;margin:0">📊 Como a galera foi</h1>${masc(fala)}</div>
+        <div class="kpis">
+          <div class="kpi ok"><div class="l">✔ Acertos</div><div class="v" data-n="${ac}">0</div></div>
+          <div class="kpi err" style="animation-delay:.15s"><div class="l">✖ Erros</div><div class="v" data-n="${er}">0</div></div>
+          <div class="kpi na" style="animation-delay:.3s"><div class="l">⏳ Não responderam</div><div class="v" data-n="${na}">0</div></div>
+        </div>
+        <div class="hbars">${d.map((n, i) => `<div class="hb ${i === st.pergunta.correta ? 'certa' : ''}">
+          <div class="sh o${i}">${LETRAS[i]}</div>
+          <div><div class="tx">${esc(st.pergunta.opcoes[i])}${i === st.pergunta.correta ? ' ✔' : ''}</div><div class="tr"><i class="o${i}" data-w="${100 * n / tot}"></i></div></div>
+          <div class="n" data-n="${n}">0</div></div>`).join('')}</div>
+        <div class="kpis">
+          <div class="kpi t" style="animation-delay:.5s"><div class="l">⚡ Mais rápida</div><div class="v">${s.rapido ? seg(s.rapido.ms) : '–'}</div><div class="nm">${s.rapido ? esc(s.rapido.nome) : 'ninguém acertou'}</div></div>
+          <div class="kpi t" style="animation-delay:.65s"><div class="l">⏱️ Tempo médio</div><div class="v">${s.media_ms != null ? seg(s.media_ms) : '–'}</div><div class="nm">de quem acertou</div></div>
+          <div class="kpi t" style="animation-delay:.8s"><div class="l">🐢 Mais lenta</div><div class="v">${s.lento ? seg(s.lento.ms) : '–'}</div><div class="nm">${s.lento ? esc(s.lento.nome) : '–'}</div></div>
+        </div>
+        <div class="actions"><button class="btn light" onclick="__tela('resposta')">◀ Resposta</button>
+          <button class="btn go" style="font-size:22px" onclick="__tela('rank')">Ver ranking 🏆</button></div></div>${selo}`;
+      document.querySelectorAll('[data-n]').forEach(el => contar(el, 0, +el.dataset.n, 1200));
+      setTimeout(() => document.querySelectorAll('.hb .tr i').forEach(el => el.style.width = el.dataset.w + '%'), 60);
+      if (ac > 0) bipe(1200, .2);
     } else if (st.status === 'resultado') {
-      // Tela 5: ranking animado
-      $app.innerHTML = `<div class="wrap">${topo}<h1 style="text-align:center;font-size:44px" class="pop">🏆 Ranking</h1>
+      // Tela 5: ranking animado com o Tormentinha
+      $app.innerHTML = `<div class="wrap">${topo}
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px">
+          <h1 class="pop" style="font-size:52px;margin:0">🏆 Ranking <span style="font-size:24px;opacity:.8">após a pergunta ${st.idx + 1}</span></h1>
+          ${masc(falaRanking())}</div>
         ${rankingHtml()}
-        <div class="actions"><button class="btn light" onclick="__tela('stats')">◀ Resultado da pergunta</button>${proximaBtn()}</div></div>`;
+        <div class="actions"><button class="btn light" onclick="__tela('stats')">◀ Estatísticas</button>${proximaBtn()}</div></div>${selo}`;
       animarRanking();
     } else if (st.status === 'fim') {
-      const r = st.ranking, cores = ['#ffd700', '#e3e7ee', '#eab27a'], alt = [240, 170, 120];
-      const ordem = [1, 0, 2].filter(i => r[i]);
-      $app.innerHTML = `<div class="wrap">${topo}<h1 class="pop" style="text-align:center;font-size:52px;display:flex;align-items:center;justify-content:center;gap:16px">
-          <img class="presente" src="img/presente.png" alt="">Quiz finalizado! Parabéns!<img class="presente" src="img/presente.png" alt=""></h1>
-        <div class="podium">${ordem.map(i => `<div class="p rise" style="animation-delay:${[1.2, .6, 1.8][i]}s">
-          <div class="nm">${esc(r[i].nome)}</div><div><b>${pts(r[i].pontos)} pts</b></div>
-          <div class="small" style="opacity:.85">${r[i].acertos} acerto${r[i].acertos === 1 ? '' : 's'} · ${seg(r[i].tempo_ms)}</div>
-          <div class="blk" style="background:${cores[i]};height:${alt[i]}px;animation-delay:${[1.2, .6, 1.8][i]}s">${i + 1}º</div></div>`).join('')}</div>
-        ${r.length > 3 ? `<div style="max-width:1000px;margin:0 auto">${r.slice(3).map(x => `<div class="rk-row rise" style="position:relative;margin:8px 0">
-          <span>${x.pos}º</span><span class="rk-nome">${esc(x.nome)}</span><span></span><span class="rk-det">${x.acertos} acertos · ${seg(x.tempo_ms)}</span><span></span><span class="rk-pts">${pts(x.pontos)}</span></div>`).join('')}</div>` : ''}
-        <div class="actions"><button class="btn light" onclick="__reiniciar()">↺ Reiniciar quiz</button>
-          <button class="btn ghost" onclick="location.href='?adm'">Voltar ao início</button></div></div>`;
-      setTimeout(() => { confete(9000); bipe(523, .15); setTimeout(() => bipe(659, .15), 150); setTimeout(() => bipe(784, .3), 300); }, 1800);
+      // Revelação final: suspense -> 3º -> 2º -> 1º -> lista completa
+      const cl = st.classificacao || [], rv = st.revelado;
+      const card = (p, cls = '') => {
+        const x = cl[p - 1];
+        return `<div class="reveal p${p} ${cls}"><div class="lugar">${['🥇', '🥈', '🥉'][p - 1]} ${p}º lugar</div>
+          <div class="quem">${x ? esc(x.nome) : '—'}</div>
+          ${x ? `<div class="det">${pts(x.pontos)} pontos · ${x.acertos} acerto${x.acertos === 1 ? '' : 's'} · ${seg(x.tempo_ms)}</div>` : ''}</div>`;
+      };
+      const btn = (txt, cls = 'go') => `<button class="btn ${cls}" style="font-size:24px;padding:18px 34px" onclick="__acao('revelar')">${txt}</button>`;
+      let corpo;
+      if (rv === 0) {
+        corpo = `<div class="center" style="min-height:70vh">
+          <h1 class="pop" style="font-size:64px">Quiz finalizado! 🎉</h1>
+          ${masc('Rufem os tambores… 🥁<br>Vamos conhecer os <b>grandes vencedores</b>!', 'big')}
+          <div class="actions">${btn('Revelar o 3º lugar 🥉')}</div></div>`;
+      } else if (rv === 1) {
+        corpo = `<div class="center" style="min-height:70vh">${card(3)}
+          <div class="actions" style="margin-top:30px">${btn('Revelar o 2º lugar 🥈')}</div></div>`;
+      } else if (rv === 2) {
+        corpo = `<div class="center" style="min-height:70vh"><div class="mini">${card(3)}</div>${card(2)}
+          <div class="actions" style="margin-top:30px">${btn('Revelar o CAMPEÃO 🏆')}</div></div>`;
+      } else if (rv === 3) {
+        corpo = `<div class="center" style="min-height:70vh"><div class="mini">${card(2)}${card(3)}</div>
+          <div style="display:flex;align-items:center;gap:20px"><img class="presente" src="img/presente.png" alt="">${card(1)}<img class="presente" src="img/presente.png" alt=""></div>
+          <div style="margin-top:16px">${masc(`Parabéns, <b>${cl[0] ? esc(cl[0].nome) : ''}</b>! 🏆`)}</div>
+          <div class="actions">${btn('Ver classificação completa 📋', 'light')}</div></div>`;
+      } else {
+        corpo = `<h1 class="pop" style="text-align:center;font-size:48px">📋 Classificação final — ${cl.length} participantes</h1>
+          <div class="mini">${card(1)}${card(2)}${card(3)}</div>
+          <div class="lista" id="lista">${cl.map((x, i) => `<div style="animation-delay:${Math.min(i, 40) * .03}s"><b>${x.pos}º</b><span>${esc(x.nome)}</span><small>${pts(x.pontos)}</small></div>`).join('')}</div>
+          <div class="actions"><button class="btn light" onclick="__reiniciar()">↺ Reiniciar quiz</button>
+            <button class="btn ghost" onclick="location.href='?adm'">Voltar ao início</button></div>`;
+      }
+      $app.innerHTML = `<div class="wrap">${topo}${corpo}</div>${selo}`;
+      if (rv === 1 || rv === 2) tambor();
+      if (rv === 3) { tambor(); setTimeout(() => { confete(10000); bipe(523, .15); setTimeout(() => bipe(659, .15), 150); setTimeout(() => bipe(784, .4), 300); }, 1300); }
+      if (rv === 4) rolarLista();
     }
+  };
+
+  // Lista longa: rola devagar sozinha para todos acharem o nome
+  const rolarLista = () => {
+    const el = document.getElementById('lista');
+    if (!el || el.scrollHeight <= el.clientHeight) return;
+    let dir = 1;
+    const passo = () => {
+      if (!document.body.contains(el)) return;
+      el.scrollTop += dir;
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 1) dir = -1;
+      else if (el.scrollTop <= 0) dir = 1;
+      setTimeout(passo, 40);
+    };
+    setTimeout(passo, 3000);
   };
 
   const tick = () => {
