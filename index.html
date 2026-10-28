@@ -911,7 +911,7 @@ async function hostGame(codigo) {
                 : `<p class="small">Nenhum quiz cadastrado. <a style="color:var(--accent)" href="?adm=quizzes">Cadastrar quiz</a></p>`}
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-              <h1 style="margin:0"><span id="nj">0</span> participante${st.jogadores === 1 ? '' : 's'}</h1>
+              <h1 style="margin:0"><span id="nj">0</span> <span id="njs">participantes</span></h1>
               <div style="text-align:right"><div class="crono" id="crono"></div>
                 <div class="crono-bt"><span class="small" style="opacity:.8;align-self:center" title="Só mostra um relógio no telão; o quiz começa quando você clicar em Começar quiz">⏱ Mostrar contagem para o início:</span>
                   ${[2, 5, 10].map(m => `<button class="btn ghost" onclick="__crono(${m})">${m} min</button>`).join('')}
@@ -1106,6 +1106,7 @@ async function hostGame(codigo) {
         : 'Vai começar! 🚀';
     }
     const nj = document.getElementById('nj'); if (nj) nj.textContent = st.jogadores;
+    const njs = document.getElementById('njs'); if (njs) njs.textContent = st.jogadores === 1 ? 'participante' : 'participantes';
     const nr = document.getElementById('nr'); if (nr) nr.textContent = st.respostas;
     const pb = document.getElementById('pb'); if (pb) pb.style.width = (st.jogadores ? 100 * st.respostas / st.jogadores : 0) + '%';
     const chips = document.getElementById('chips');
