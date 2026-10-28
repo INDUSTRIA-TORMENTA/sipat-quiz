@@ -388,17 +388,52 @@ function bipe(freq = 880, dur = .12, vol = .25, tipo = 'sine') {
   } catch {}
 }
 
-// Trilha de suspense durante a pergunta: baixo pulsando + arpejo menor; acelera nos últimos 5s
-const trilha = { prox: 0, passo: 0 };
-function tocarTrilha(rest) {
+// Guarda arquivos no navegador (IndexedDB) — usado para a música escolhida pelo apresentador
+function arquivoLocal(op, chave, valor) {
+  return new Promise((ok, erro) => {
+    const r = indexedDB.open('sipat-quiz', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('arquivos');
+    r.onerror = () => erro(r.error);
+    r.onsuccess = () => {
+      const tx = r.result.transaction('arquivos', op === 'get' ? 'readonly' : 'readwrite'), s = tx.objectStore('arquivos');
+      const q = op === 'get' ? s.get(chave) : op === 'put' ? s.put(valor, chave) : s.delete(chave);
+      tx.oncomplete = () => ok(q.result); tx.onerror = () => erro(tx.error);
+    };
+  });
+}
+
+// Trilha de suspense (clima de filme): zumbido grave que vai abrindo, tic-tac de relógio e batida de coração.
+// Nos últimos 5s tudo acelera. Se o apresentador escolher um arquivo de música, ele toca no lugar.
+const trilha = { prox: 0, passo: 0, drone: null };
+function droneLiga() {
+  if (somOff || trilha.drone) return;
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const g = audio.createGain(), f = audio.createBiquadFilter();
+    f.type = 'lowpass'; f.frequency.value = 220; f.Q.value = 6;
+    g.gain.setValueAtTime(0, audio.currentTime); g.gain.linearRampToValueAtTime(.14, audio.currentTime + 1.5);
+    const os = [55, 55.7, 82.4, 110.3].map(fr => {
+      const o = audio.createOscillator(); o.type = 'sawtooth'; o.frequency.value = fr; o.connect(f); o.start(); return o;
+    });
+    f.connect(g); g.connect(audio.destination);
+    trilha.drone = { g, f, os };
+  } catch {}
+}
+function droneDesliga() {
+  const d = trilha.drone; if (!d) return;
+  trilha.drone = null;
+  try { d.g.gain.cancelScheduledValues(audio.currentTime); d.g.gain.setTargetAtTime(0, audio.currentTime, .15); d.os.forEach(o => o.stop(audio.currentTime + 1)); } catch {}
+}
+function tocarTrilha(rest, total) {
+  droneLiga();
+  const urgente = rest <= 5000;
+  if (trilha.drone) trilha.drone.f.frequency.setTargetAtTime(urgente ? 1600 : 220 + 700 * (1 - rest / total), audio.currentTime, .4);
   const agora = performance.now();
   if (agora < trilha.prox) return;
-  const urgente = rest <= 5000;
-  trilha.prox = agora + (urgente ? 230 : 460);
+  trilha.prox = agora + (urgente ? 250 : 500);
   const p = trilha.passo++;
-  bipe(p % 4 === 0 ? 55 : 41.2, .3, .35, 'sine');
-  bipe([220, 261.6, 329.6, 261.6, 196, 246.9, 293.7, 246.9][p % 8] * (urgente ? 2 : 1), .16, .06, 'triangle');
-  if (p % 2) bipe(3000, .03, .03, 'square');
+  bipe(p % 2 ? 1400 : 1850, .035, .09, 'square'); // tic-tac
+  if (p % (urgente ? 2 : 4) === 0) { bipe(62, .14, .6); setTimeout(() => bipe(52, .14, .45), 160); } // tum-tum
 }
 
 // ---------- Roteamento ----------
@@ -787,7 +822,32 @@ async function hostGame(codigo) {
   let st = null, viewKey = '', tela = 'resposta', ocupado = false, bipUlt = null, modelos = [], ultRv = null, dicaUlt = -1;
   // Contagem para o início (só no telão; o quiz começa quando você clicar em "Começar")
   let cronoFim = store.get('sq_crono_' + codigo);
-  window.__som = () => { somOff = !somOff; store.set('sq_som_off', somOff); viewKey = ''; render(); };
+  window.__som = () => { somOff = !somOff; store.set('sq_som_off', somOff); if (somOff) pararTrilha(); viewKey = ''; render(); };
+
+  // Música própria (arquivo escolhido neste computador; fica guardada só neste navegador)
+  let musica = null, musicaNome = null;
+  const pararTrilha = () => { droneDesliga(); if (musica && !musica.paused) musica.pause(); };
+  const usarMusica = reg => {
+    if (musica) { musica.pause(); URL.revokeObjectURL(musica.src); }
+    musica = reg ? new Audio(URL.createObjectURL(reg.blob)) : null;
+    if (musica) { musica.loop = true; musica.volume = .7; }
+    musicaNome = reg ? reg.nome : null;
+    const el = document.getElementById('mus-nome'); if (el) el.textContent = musicaNome || 'trilha de suspense do quiz';
+    const x = document.getElementById('mus-x'); if (x) x.style.display = musicaNome ? '' : 'none';
+  };
+  arquivoLocal('get', 'musica').then(usarMusica).catch(() => {});
+  window.__musica = () => {
+    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'audio/*';
+    inp.onchange = async () => {
+      const f = inp.files[0]; if (!f) return;
+      const reg = { nome: f.name, blob: f };
+      try { await arquivoLocal('put', 'musica', reg); } catch {}
+      usarMusica(reg);
+      musica.play().then(() => setTimeout(() => musica.pause(), 2500)).catch(() => {}); // amostra de 2,5s
+    };
+    inp.click();
+  };
+  window.__semMusica = async () => { try { await arquivoLocal('delete', 'musica'); } catch {} usarMusica(null); };
   window.__crono = min => { cronoFim = min ? Date.now() + min * 60000 : null; store.set('sq_crono_' + codigo, cronoFim); };
 
   const acao = async a => {
@@ -918,6 +978,9 @@ async function hostGame(codigo) {
                   <button class="btn ghost" onclick="__crono(0)">✕</button></div></div></div>
             <div class="chips" id="chips"></div>
             <div class="dica">${masc('<span id="dica-txt"></span>')}</div>
+            <div class="small" style="margin-top:10px;opacity:.9">🎵 Música das perguntas: <b id="mus-nome">${esc(musicaNome || 'trilha de suspense do quiz')}</b>
+              <button class="link" onclick="__musica()">escolher arquivo</button>
+              <button class="link" id="mus-x" style="${musicaNome ? '' : 'display:none'}" onclick="__semMusica()">voltar para a trilha padrão</button></div>
             <div class="actions" style="justify-content:flex-start">
               <button class="btn go" style="font-size:22px" ${st.total ? '' : 'disabled title="Escolha o quiz primeiro"'} onclick="__acao('proxima')">Começar quiz ▶</button>
               ${st.jogadores ? `<button class="btn ghost" style="min-width:0" onclick="__limpar()">Remover participantes</button>` : ''}</div></div>
@@ -1088,8 +1151,11 @@ async function hostGame(codigo) {
       document.getElementById('arc').setAttribute('stroke-dashoffset', 402 * (1 - rest / (fim - ini)));
       document.getElementById('ring').classList.toggle('hot', rest <= 5000);
       if (rest <= 5000 && s > 0 && s !== bipUlt) { bipUlt = s; bipe(s <= 3 ? 1000 : 800, .1); }
-      if (rest > 0) tocarTrilha(rest);
-    }
+      if (rest > 0 && !somOff) {
+        if (musica) { if (musica.paused) { musica.currentTime = 0; musica.play().catch(() => {}); } musica.playbackRate = rest <= 5000 ? 1.12 : 1; }
+        else tocarTrilha(rest, fim - ini);
+      } else pararTrilha();
+    } else pararTrilha();
     const dt = document.getElementById('dica-txt');
     if (dt) {
       const i = Math.floor(Date.now() / 9000) % DICAS.length;
