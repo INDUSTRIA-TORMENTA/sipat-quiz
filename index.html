@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+<title>Quiz SIPAT Tormenta 2026</title>
+<style>
+  :root {
+    --bg: #0d2a1a; --bg2: #14532d; --card: #ffffff; --ink: #1d1d2b; --muted: #6b6b80;
+    --a: #e21b3c; --b: #1368ce; --c: #d89e00; --d: #26890c; --ok: #1fa34a; --bad: #e21b3c;
+    --accent: #ffcc00;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    background: url(img/fundo.jpg) center / cover fixed, radial-gradient(circle at 20% 0%, var(--bg2), var(--bg) 70%) fixed;
+    color: #fff; min-height: 100vh; overflow-x: hidden;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 16px; }
+  .center { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 16px; }
+  .card { background: var(--card); color: var(--ink); border-radius: 16px; padding: 24px; width: 100%; max-width: 440px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+  .card.wide { max-width: 1000px; }
+  h1 { margin: 0 0 8px; font-size: 32px; }
+  h2 { margin: 0 0 12px; }
+  input[type=text], input[type=tel], input[type=password], select {
+    width: 100%; font-size: 20px; padding: 12px; border: 2px solid #ccc; border-radius: 10px; margin: 6px 0 12px; font-weight: 700; font-family: inherit;
+  }
+  .card input { text-align: center; }
+  button { font: inherit; cursor: pointer; border: 0; border-radius: 10px; padding: 14px 22px; font-weight: 800; font-size: 18px; }
+  button:disabled { opacity: .45; cursor: default; }
+  .btn { background: #333; color: #fff; width: 100%; }
+  .btn.primary { background: var(--bg2); }
+  .btn.go { background: var(--ok); }
+  .btn.warn { background: var(--bad); }
+  .btn.light { background: #fff; color: var(--ink); }
+  .btn.ghost { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.5); }
+  .link { background: none; color: #cfe; text-decoration: underline; font-weight: 400; font-size: 15px; padding: 8px; }
+  .muted { color: var(--muted); }
+  .err { color: var(--bad); font-weight: 700; min-height: 1.2em; margin-top: 8px; }
+  .small { font-size: 14px; }
+  .badge { display: inline-block; background: rgba(255,255,255,.15); padding: 6px 14px; border-radius: 999px; font-weight: 700; }
+
+  /* marca (imagens da apresentação SIPAT 2026) */
+  .brand { display: flex; flex-direction: column; align-items: center; gap: 6px; --w: 460px; }
+  .brand.sm { --w: 280px; } .brand.xl { --w: 820px; }
+  .brand .tor { display: flex; align-items: center; gap: 10px; font-family: 'Lilita One', 'Segoe UI', sans-serif; font-size: calc(var(--w) * .075); line-height: .9; text-align: left; letter-spacing: 1px; }
+  .brand .tor img { width: calc(var(--w) * .1); }
+  .brand .tor small { display: block; font-size: .55em; font-family: 'Segoe UI', sans-serif; font-weight: 800; letter-spacing: 0; }
+  .brand .logo { width: min(var(--w), 90vw); filter: drop-shadow(0 10px 18px rgba(0,0,0,.45)); }
+  .brand .ano { font-family: 'Lilita One', 'Segoe UI', sans-serif; color: #0b3d1c; font-size: calc(var(--w) * .13); line-height: 1;
+    background: url(img/pincel-branco.png) center / 100% 100% no-repeat; padding: .08em .6em .12em; margin-top: calc(var(--w) * -.05); transform: rotate(-3deg); }
+  .brand .lema { font-family: 'Lilita One', 'Segoe UI', sans-serif; font-size: calc(var(--w) * .062); line-height: 1.05; text-align: center;
+    background: url(img/pincel-verde.png) center / 100% 100% no-repeat; padding: .35em 1.2em .45em; margin-top: 8px; transform: rotate(-2deg); }
+  .brand .lema span { display: block; } .brand .lema .y { color: var(--accent); }
+  .brand.sm .lema { display: none; }
+  .planta { position: fixed; right: -20px; bottom: -20px; width: min(320px, 35vw); pointer-events: none; opacity: .95; z-index: 0; }
+  .presente { width: 110px; animation: shake 1s ease-in-out infinite; }
+  h1, .qtext, .code, .huge, .big { font-family: 'Lilita One', 'Segoe UI', sans-serif; font-weight: 400; letter-spacing: .5px; }
+
+  /* opções */
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+  .opt { color: #fff; border-radius: 12px; padding: 18px; font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 12px; text-align: left; min-height: 90px; box-shadow: inset 0 -6px 0 rgba(0,0,0,.2); }
+  .opt .sh { font-size: 30px; flex: none; }
+  .o0 { background: var(--a); } .o1 { background: var(--b); } .o2 { background: var(--c); } .o3 { background: var(--d); }
+  .opt.fade { opacity: .3; }
+  .opt.right { outline: 6px solid #fff; animation: pulse 1s ease-in-out 2; }
+
+  /* animações */
+  @keyframes pop { 0% { transform: scale(.3); opacity: 0; } 70% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
+  @keyframes rise { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes pulse { 50% { transform: scale(1.05); } }
+  @keyframes shake { 0%,100% { transform: none; } 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+  .pop { animation: pop .6s cubic-bezier(.2,1.4,.4,1) both; }
+  .rise { animation: rise .6s ease-out both; }
+
+  /* celular */
+  .pl-q { font-size: 20px; font-weight: 800; margin: 8px 0 14px; }
+  .pl .opts { gap: 10px; }
+  .pl .opt { font-size: 18px; min-height: 110px; padding: 14px; }
+  .bar { height: 10px; background: rgba(255,255,255,.2); border-radius: 6px; overflow: hidden; width: 100%; margin: 8px 0; }
+  .bar > i { display: block; height: 100%; background: var(--accent); transition: width .2s linear; }
+  .big { font-size: 72px; font-weight: 900; line-height: 1; }
+  .huge { font-size: 160px; font-weight: 900; line-height: 1; color: var(--accent); }
+  .res-ok { background: var(--ok); } .res-bad { background: var(--bad); }
+  .full { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 16px; overflow: auto; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+
+  /* telão */
+  .qtext { background: #fff; color: var(--ink); border-radius: 14px; padding: 22px; font-size: 36px; font-weight: 800; text-align: center; margin-bottom: 16px; }
+  .mid { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; margin-bottom: 16px; }
+  .ring { position: relative; width: 150px; height: 150px; }
+  .ring svg { transform: rotate(-90deg); }
+  .ring b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: 900; }
+  .ring.hot b { color: var(--bad); animation: pulse .5s infinite; }
+  .ring.hot circle.fg { stroke: var(--bad); }
+  .prog { text-align: center; }
+  .prog .n { font-size: 56px; font-weight: 900; }
+  .prog .bar { height: 18px; }
+  .lobby { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: start; }
+  .qr { background: #fff; padding: 14px; border-radius: 14px; display: inline-block; }
+  .code { font-size: 64px; font-weight: 900; letter-spacing: 6px; color: var(--accent); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; max-height: 46vh; overflow: auto; }
+  .chip { background: rgba(255,255,255,.15); padding: 8px 14px; border-radius: 999px; font-weight: 700; animation: pop .4s both; }
+  .pick { background: rgba(255,255,255,.1); border-radius: 14px; padding: 14px; margin-bottom: 14px; }
+  .pick select { margin: 6px 0 0; }
+
+  .stats { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  .stat { background: #fff; color: var(--ink); border-radius: 14px; padding: 16px; text-align: center; animation: pop .6s cubic-bezier(.2,1.4,.4,1) both; }
+  .stat .ic { font-size: 34px; }
+  .stat .v { font-size: 40px; font-weight: 900; line-height: 1.1; }
+  .stat .l { font-weight: 700; color: var(--muted); }
+  .stat .nm { font-weight: 800; font-size: 18px; word-break: break-word; }
+  .stat.main { background: var(--accent); }
+  .dist { display: flex; gap: 18px; align-items: flex-end; height: 230px; justify-content: center; margin-bottom: 16px; }
+  .dist .col { width: 130px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .dist .col i { display: block; width: 100%; border-radius: 10px 10px 0 0; height: 6px; transition: height 1.2s cubic-bezier(.2,1,.3,1); }
+  .dist .col b { font-size: 30px; margin-bottom: 4px; }
+  .dist .col .lb { font-size: 26px; margin-top: 6px; }
+
+  .rk { position: relative; max-width: 1000px; margin: 0 auto; }
+  .rk-row { position: absolute; left: 0; right: 0; height: 56px; display: grid; grid-template-columns: 70px 1fr 70px 190px 90px 110px; align-items: center; gap: 8px;
+    background: #fff; color: var(--ink); border-radius: 12px; padding: 0 16px; font-size: 22px; font-weight: 800;
+    transition: transform 1.2s cubic-bezier(.3,1.2,.4,1), opacity .8s; }
+  .rk-row.top1 { background: #ffd700; } .rk-row.top2 { background: #e3e7ee; } .rk-row.top3 { background: #eab27a; }
+  .rk-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rk-det { font-size: 16px; color: #555; font-weight: 700; text-align: right; }
+  .rk-gan { color: var(--ok); text-align: right; font-size: 18px; }
+  .rk-pts { text-align: right; font-size: 26px; }
+  .up { color: var(--ok); font-style: normal; font-size: 16px; } .down { color: var(--bad); font-style: normal; font-size: 16px; }
+  .podium { display: flex; justify-content: center; align-items: flex-end; gap: 16px; margin: 20px 0; }
+  .podium .p { width: 230px; text-align: center; }
+  .podium .p .blk { border-radius: 12px 12px 0 0; display: flex; align-items: flex-start; justify-content: center; padding-top: 12px; font-size: 54px; font-weight: 900; color: var(--ink); animation: rise 1s ease-out both; }
+  .podium .p .nm { font-size: 26px; font-weight: 900; margin-bottom: 4px; word-break: break-word; }
+  .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+  .actions button { width: auto; min-width: 220px; }
+  table.prev { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 12px; text-align: left; }
+  table.prev th, table.prev td { border-bottom: 1px solid #ddd; padding: 6px; vertical-align: top; }
+  table.prev td.ok, .ok { color: var(--ok); font-weight: 800; }
+  .drop { border: 3px dashed #bbb; border-radius: 12px; padding: 18px; text-align: center; margin: 12px 0; }
+  .lib { list-style: none; padding: 0; margin: 0; text-align: left; }
+  .lib li { display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid #ddd; padding: 10px 0; }
+  .lib button { padding: 8px 12px; font-size: 14px; width: auto; }
+  canvas.confete { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+  @media (max-width: 800px) {
+    .lobby, .mid, .stats { grid-template-columns: 1fr; text-align: center; }
+    .qtext { font-size: 22px; } .opt { font-size: 17px; min-height: 70px; }
+    .dist .col { width: 60px; } .podium .p { width: 105px; } .podium .p .nm { font-size: 15px; }
+    .code { font-size: 44px; } .brand:not(.sm) { --w: 330px; }
+    .rk-row { grid-template-columns: 44px 1fr 70px; font-size: 16px; } .rk-det, .rk-var, .rk-gan { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ---------- Configuração ----------
+const SB_URL = 'https://pxmlqjeqptppgcctptuh.supabase.co';
+const SB_KEY = 'sb_publishable_kxz8BAAwN4IIxd9BiRIdvw_a6qJbIoF';
+const SHAPES = ['▲', '◆', '●', '■'];
+const LETRAS = ['A', 'B', 'C', 'D'];
+
+// ---------- Utilidades ----------
+const $app = document.getElementById('app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const seg = ms => (ms / 1000).toFixed(1).replace('.', ',') + 's';
+const pts = n => Number(n || 0).toLocaleString('pt-BR');
+const params = new URLSearchParams(location.search);
+const baseUrl = location.origin + location.pathname;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+let clockOffset = 0; // relógio do servidor - relógio local
+const serverNow = () => Date.now() + clockOffset;
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} },
+};
+
+// Marca da SIPAT 2026 (imagens em img/, tiradas da apresentação oficial)
+const brand = (cls = '') => `<div class="brand ${cls}">
+  <div class="tor"><img src="img/raio.png" alt=""><span><small>Sementes</small>TORMENTA</span></div>
+  <img class="logo" src="img/logo-sipat.png" alt="SIPAT">
+  <div class="ano">2026</div>
+  <div class="lema"><span>CULTURA DE SEGURANÇA</span><span class="y">SE PLANTA TODO DIA.</span></div></div>`;
+
+async function rpc(fn, args) {
+  const t0 = Date.now();
+  const res = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: 'POST',
+    headers: { apikey: SB_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify(args),
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error((data && data.message) || 'Falha de conexão');
+  if (data && data.agora) clockOffset = Date.parse(data.agora) - (t0 + Date.now()) / 2;
+  return data;
+}
+
+function loadScript(src) {
+  return new Promise((ok, fail) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = ok; s.onerror = () => fail(new Error('Não carregou ' + src));
+    document.head.appendChild(s);
+  });
+}
+const loadXlsx = () => window.XLSX ? Promise.resolve() : loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+const loadQr = () => window.QRCode ? Promise.resolve() : loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js');
+
+// Loop de consulta: chama fn a cada `ms`, sem sobrepor chamadas
+function poller(fn, ms) {
+  (async function loop() {
+    for (;;) {
+      try { await fn(); } catch (e) { console.warn(e); }
+      await sleep(ms + Math.random() * 200);
+    }
+  })();
+}
+
+// Número subindo de `de` até `ate`
+function contar(el, de, ate, ms = 1200, fmt = pts) {
+  if (!el) return;
+  const t0 = performance.now();
+  const passo = t => {
+    const k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = fmt(Math.round(de + (ate - de) * e));
+    if (k < 1) requestAnimationFrame(passo);
+  };
+  requestAnimationFrame(passo);
+}
+
+function confete(ms = 6000) {
+  const cv = document.createElement('canvas'); cv.className = 'confete';
+  document.body.appendChild(cv);
+  const cx = cv.getContext('2d'), W = cv.width = innerWidth, H = cv.height = innerHeight;
+  const cores = ['#ffcc00', '#e21b3c', '#1368ce', '#26890c', '#ffffff', '#ff7a00'];
+  const ps = Array.from({ length: 180 }, () => ({ x: Math.random() * W, y: -Math.random() * H, r: 5 + Math.random() * 7,
+    vy: 2 + Math.random() * 4, vx: -2 + Math.random() * 4, a: Math.random() * 6, c: cores[Math.random() * cores.length | 0] }));
+  const fim = performance.now() + ms;
+  (function frame(t) {
+    cx.clearRect(0, 0, W, H);
+    ps.forEach(p => {
+      p.y += p.vy; p.x += p.vx; p.a += .1;
+      if (p.y > H && t < fim) { p.y = -10; p.x = Math.random() * W; }
+      cx.fillStyle = p.c; cx.save(); cx.translate(p.x, p.y); cx.rotate(p.a); cx.fillRect(-p.r / 2, -p.r / 4, p.r, p.r / 2); cx.restore();
+    });
+    if (t < fim + 3000) requestAnimationFrame(frame); else cv.remove();
+  })(performance.now());
+}
+
+// Bipe dos últimos segundos (pressão!)
+let audio;
+function bipe(freq = 880, dur = .12) {
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.frequency.value = freq; o.connect(g); g.connect(audio.destination);
+    g.gain.setValueAtTime(.25, audio.currentTime); g.gain.exponentialRampToValueAtTime(.001, audio.currentTime + dur);
+    o.start(); o.stop(audio.currentTime + dur);
+  } catch {}
+}
+
+// ---------- Roteamento ----------
+if (params.get('host')) hostGame(params.get('host'));
+else if (params.has('adm')) admin(params.get('adm'));
+else playerStart(params.get('c') || '');
+
+// =====================================================================
+// CELULAR DO PARTICIPANTE
+// =====================================================================
+function playerStart(codigo) {
+  const salvo = codigo && store.get('sq_player_' + codigo);
+  if (salvo) return playerGame(codigo, salvo);
+  $app.innerHTML = `
+    <div class="center">
+      <div class="pop">${brand('sm')}</div>
+      <div class="card rise" style="margin-top:20px">
+        <div style="${codigo ? 'display:none' : ''}">
+          <label class="muted">Código do quiz</label>
+          <input id="cod" type="tel" inputmode="numeric" maxlength="6" placeholder="000000" value="${esc(codigo)}">
+        </div>
+        <label class="muted">Digite seu nome</label>
+        <input id="nome" type="text" maxlength="30" placeholder="Nome e setor" autocomplete="off">
+        <button class="btn go" id="entrar">Entrar no quiz</button>
+        <div class="err" id="err"></div>
+      </div>
+      <button class="link" onclick="location.href='?adm'">Administrador</button>
+    </div>`;
+  const $cod = document.getElementById('cod'), $nome = document.getElementById('nome'), $err = document.getElementById('err');
+  (codigo ? $nome : $cod).focus();
+  const entrar = async () => {
+    const c = $cod.value.trim(), n = $nome.value.trim();
+    if (c.length !== 6) return $err.textContent = 'Digite o código de 6 números';
+    if (!n) return $err.textContent = 'Digite seu nome';
+    const prev = store.get('sq_player_' + c);
+    if (prev) return playerGame(c, prev);
+    document.getElementById('entrar').disabled = true;
+    try {
+      const me = await rpc('sipat_quiz_entrar', { p_codigo: c, p_nome: n });
+      store.set('sq_player_' + c, me);
+      history.replaceState(null, '', '?c=' + c);
+      playerGame(c, me);
+    } catch (e) {
+      $err.textContent = e.message;
+      document.getElementById('entrar').disabled = false;
+    }
+  };
+  document.getElementById('entrar').onclick = entrar;
+  $nome.onkeydown = e => { if (e.key === 'Enter') entrar(); };
+}
+
+function playerGame(codigo, me) {
+  let st = null, viewKey = '', enviando = null, minha = null, cdUlt = null;
+
+  const render = () => {
+    if (!st) return;
+    const prep = st.status === 'pergunta' && serverNow() < Date.parse(st.inicio_em);
+    const respondeu = st.respondeu || enviando === st.idx;
+    const key = [st.status, st.idx, prep, respondeu].join('|');
+    if (key !== viewKey) { viewKey = key; draw(prep, respondeu); }
+    tick();
+  };
+
+  const draw = (prep, respondeu) => {
+    const head = `<div class="badge" style="position:fixed;top:12px;left:12px;z-index:5">${esc(st.nome)}</div>`;
+    if (st.status === 'lobby') {
+      $app.innerHTML = `${head}<div class="full">
+        <div class="pop">${brand()}</div>
+        <h2 class="rise" style="margin-top:24px">Olá, ${esc(st.nome)}! 👋</h2>
+        <p class="rise">Você está dentro. Aguarde o apresentador liberar a primeira pergunta.</p>
+        <p class="badge" id="njog"></p></div>`;
+    } else if (st.status === 'pergunta' && prep) {
+      cdUlt = null;
+      $app.innerHTML = `${head}<div class="full">
+        <div class="badge">Pergunta ${st.idx + 1} de ${st.total}</div>
+        <h1 style="margin:16px 0">Prepare-se!</h1><div class="huge" id="cd"></div></div>`;
+    } else if (st.status === 'pergunta' && !respondeu) {
+      const ops = st.pergunta.opcoes.map((o, i) =>
+        `<button class="opt o${i} pop" style="animation-delay:${i * .08}s" data-i="${i}"><span class="sh">${SHAPES[i]}</span><span>${esc(o)}</span></button>`).join('');
+      $app.innerHTML = `<div class="wrap pl">
+        <div class="top"><span class="badge">${st.idx + 1}/${st.total}</span><span class="badge" id="tl"></span></div>
+        <div class="bar"><i id="tb"></i></div>
+        <div class="pl-q">${esc(st.pergunta.texto)}</div>
+        <div class="opts">${ops}</div></div>`;
+      $app.querySelectorAll('.opt').forEach(b => b.onclick = () => responder(+b.dataset.i));
+    } else if (st.status === 'pergunta') {
+      const i = st.minha_opcao ?? minha;
+      $app.innerHTML = `${head}<div class="full">
+        ${i != null ? `<div class="opt o${i} pop" style="width:120px;height:120px;justify-content:center;font-size:56px">${SHAPES[i]}</div>` : ''}
+        <h1 style="margin-top:20px">Resposta enviada!</h1><p style="font-size:20px">Aguarde todos finalizarem… ⏳</p></div>`;
+    } else if (st.status === 'resultado') {
+      const ok = st.acertou === true, nao = st.acertou == null;
+      $app.innerHTML = `${head}<div class="full ${ok ? 'res-ok' : 'res-bad'}">
+        <div class="big pop">${ok ? '✔' : '✖'}</div>
+        <h1 class="pop" style="margin:12px 0;font-size:42px">${ok ? 'Acertou!' : nao ? 'Não respondeu' : 'Errou!'}</h1>
+        ${ok ? `<div class="badge pop" style="font-size:28px;animation-delay:.3s">+<span id="gan">0</span> pontos</div>` : ''}
+        ${!ok && st.correta != null ? `<p class="rise">Resposta certa: <b>${esc(st.pergunta.opcoes[st.correta])}</b></p>` : ''}
+        <p class="rise" style="font-size:22px;margin-top:24px;animation-delay:.5s">Você está em <b>${st.posicao}º lugar</b><br>${pts(st.pontos)} pontos</p>
+        <p class="small" style="opacity:.8">Aguarde a próxima pergunta</p></div>`;
+      if (ok) contar(document.getElementById('gan'), 0, st.ganhou, 1000);
+    } else if (st.status === 'fim') {
+      const medal = ['🥇', '🥈', '🥉'][st.posicao - 1] || '🎉';
+      $app.innerHTML = `${head}<div class="full">
+        <div class="big pop">${medal}</div>
+        <h1 class="pop" style="margin:16px 0;font-size:40px">Quiz finalizado!<br>Parabéns!</h1>
+        ${st.posicao <= 3 ? '<img class="presente" src="img/presente.png" alt=""><p class="rise"><b>Você está no pódio!</b></p>' : ''}
+        <p class="rise" style="font-size:24px">Você ficou em <b>${st.posicao}º lugar</b></p>
+        <p class="rise">${pts(st.pontos)} pontos · acertou ${st.acertos} de ${st.total}</p>
+        <div style="margin-top:24px;opacity:.85">${brand('sm')}</div>
+        <p class="small" style="opacity:.8">Obrigado por participar da SIPAT!</p></div>`;
+      confete(5000);
+    }
+  };
+
+  const tick = () => {
+    const now = serverNow();
+    const cd = document.getElementById('cd');
+    if (cd) {
+      const n = Math.max(1, Math.ceil((Date.parse(st.inicio_em) - now) / 1000));
+      if (n !== cdUlt) { cdUlt = n; cd.textContent = n; cd.classList.remove('pop'); void cd.offsetWidth; cd.classList.add('pop'); }
+    }
+    const tb = document.getElementById('tb'), tl = document.getElementById('tl');
+    if (tb && st.fim_em) {
+      const ini = Date.parse(st.inicio_em), fim = Date.parse(st.fim_em), rest = Math.max(0, fim - now);
+      tb.style.width = (100 * rest / (fim - ini)) + '%';
+      tb.style.background = rest < 5000 ? 'var(--bad)' : '';
+      tl.textContent = Math.ceil(rest / 1000) + 's';
+    }
+    const nj = document.getElementById('njog');
+    if (nj) nj.textContent = st.jogadores + ' participantes na sala';
+  };
+
+  const responder = async i => {
+    enviando = st.idx; minha = i; render();
+    try {
+      const r = await rpc('sipat_quiz_responder', { p_codigo: codigo, p_jogador: me.jogador_id, p_token: me.token, p_idx: st.idx, p_opcao: i });
+      if (r && r.ok === false) alert(r.motivo || 'Resposta não registrada');
+    } catch (e) { alert(e.message); }
+  };
+
+  poller(async () => {
+    try {
+      st = await rpc('sipat_quiz_jogador_estado', { p_codigo: codigo, p_jogador: me.jogador_id, p_token: me.token });
+      render();
+    } catch (e) {
+      if (/não encontrado/i.test(e.message)) { store.del('sq_player_' + codigo); location.href = '?c=' + codigo; }
+      throw e;
+    }
+  }, 1000);
+  setInterval(render, 150);
+}
+
+// =====================================================================
+// ADMINISTRADOR: senha, tela de entrada (1) e cadastro de quizzes (6)
+// =====================================================================
+async function pedirSenha() {
+  const s = store.get('sq_senha');
+  if (s && await rpc('sipat_quiz_login', { p_senha: s }).catch(() => false)) return s;
+  return new Promise(resolve => {
+    $app.innerHTML = `<div class="center">${brand('sm')}
+      <div class="card" style="margin-top:20px"><h2>Administrador</h2>
+        <input id="senha" type="password" placeholder="Senha">
+        <button class="btn go" id="ok">Entrar</button><div class="err" id="err"></div></div></div>`;
+    const go = async () => {
+      const v = document.getElementById('senha').value;
+      if (await rpc('sipat_quiz_login', { p_senha: v }).catch(() => false)) { store.set('sq_senha', v); resolve(v); }
+      else document.getElementById('err').textContent = 'Senha incorreta';
+    };
+    document.getElementById('ok').onclick = go;
+    document.getElementById('senha').onkeydown = e => { if (e.key === 'Enter') go(); };
+    document.getElementById('senha').focus();
+  });
+}
+
+async function admin(tela) {
+  const senha = await pedirSenha();
+  if (tela === 'quizzes') return adminQuizzes(senha);
+  // Tela 1: entrada
+  const sala = store.get('sq_host_ultimo');
+  $app.innerHTML = `<img class="planta rise" src="img/planta.png" alt=""><div class="center" style="position:relative;z-index:1">
+    <div class="pop">${brand('xl')}</div>
+    <div class="actions rise" style="margin-top:40px;animation-delay:.3s">
+      <button class="btn go" id="abrir" style="font-size:24px;padding:20px 34px">Abrir sala do quiz ▶</button>
+      <button class="btn ghost" onclick="location.href='?adm=quizzes'">Cadastrar / ver quizzes</button>
+    </div>
+    ${sala ? `<button class="link" style="margin-top:14px" onclick="location.href='?host=${esc(sala.codigo)}'">Voltar para a sala ${esc(sala.codigo)}</button>` : ''}
+    <div class="err" id="err"></div></div>`;
+  document.getElementById('abrir').onclick = async () => {
+    try {
+      const r = await rpc('sipat_quiz_abrir_sala', { p_senha: senha });
+      store.set('sq_host_' + r.codigo, r.host_token);
+      store.set('sq_host_ultimo', { codigo: r.codigo });
+      location.href = '?host=' + r.codigo;
+    } catch (e) { document.getElementById('err').textContent = e.message; }
+  };
+}
+
+// Tela 6: cadastro de quizzes (só múltipla escolha)
+async function adminQuizzes(senha) {
+  let perguntas = [];
+  $app.innerHTML = `
+    <div class="wrap">
+      <div class="top">${brand('sm')}<button class="btn ghost" style="width:auto" onclick="location.href='?adm'">◀ Voltar</button></div>
+      <div class="card wide" style="margin:0 auto 16px">
+        <h2>Quizzes cadastrados</h2><ul class="lib" id="lib"><li class="muted">Carregando…</li></ul>
+      </div>
+      <div class="card wide" style="margin:0 auto">
+        <h2>Cadastrar novo quiz</h2>
+        <label class="muted">Nome do quiz (ex.: Palestra NR-35 – Dia 1)</label>
+        <input id="titulo" type="text" placeholder="Nome do quiz" style="text-align:left">
+        <div class="drop">
+          <p><b>Suba a planilha de perguntas</b> (Excel .xlsx ou .csv) — só alternativas</p>
+          <p class="small muted">Colunas: Pergunta · A · B · C · D · Correta (A/B/C/D) · Tempo (segundos, opcional, padrão 20)</p>
+          <input type="file" id="arq" accept=".xlsx,.xls,.csv">
+          <p><button class="link" style="color:var(--b)" id="modelo">Baixar planilha modelo</button></p>
+        </div>
+        <div class="err" id="err"></div>
+        <div id="prev"></div>
+        <button class="btn go" id="salvar" disabled style="margin-top:12px">Salvar quiz</button>
+      </div>
+    </div>`;
+  const $err = document.getElementById('err'), $prev = document.getElementById('prev'), $salvar = document.getElementById('salvar');
+
+  const listar = async () => {
+    const lista = await rpc('sipat_quiz_modelo_listar', { p_senha: senha });
+    document.getElementById('lib').innerHTML = lista.map(m => `<li><span><b>${esc(m.titulo)}</b><br>
+      <span class="small muted">${m.n} perguntas · ${new Date(m.created_at).toLocaleString('pt-BR')}</span></span>
+      <button class="btn warn" data-del="${m.id}">Excluir</button></li>`).join('') || '<li class="muted">Nenhum quiz ainda. Cadastre abaixo.</li>';
+    document.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+      if (!confirm('Excluir este quiz?')) return;
+      await rpc('sipat_quiz_modelo_excluir', { p_senha: senha, p_id: b.dataset.del });
+      listar();
+    });
+  };
+  listar();
+
+  document.getElementById('modelo').onclick = async () => {
+    await loadXlsx();
+    const ws = XLSX.utils.aoa_to_sheet(MODELO);
+    ws['!cols'] = [{ wch: 60 }, { wch: 30 }, { wch: 30 }, { wch: 30 }, { wch: 30 }, { wch: 9 }, { wch: 8 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Perguntas');
+    XLSX.writeFile(wb, 'modelo-quiz-sipat.xlsx');
+  };
+
+  document.getElementById('arq').onchange = async ev => {
+    $err.textContent = ''; $prev.innerHTML = ''; $salvar.disabled = true;
+    const f = ev.target.files[0]; if (!f) return;
+    const $t = document.getElementById('titulo');
+    if (!$t.value.trim()) $t.value = f.name.replace(/\.[^.]+$/, '');
+    try {
+      await loadXlsx();
+      const { lista, erros } = converter(await lerPlanilha(f));
+      perguntas = lista;
+      $prev.innerHTML = `<p><b>${lista.length} perguntas</b> prontas${erros.length ? `, <span style="color:var(--bad)">${erros.length} linha(s) com problema</span>` : ''}</p>
+        ${erros.length ? `<ul class="small" style="color:var(--bad);text-align:left">${erros.map(e => `<li>${esc(e)}</li>`).join('')}</ul>` : ''}
+        <table class="prev"><tr><th>#</th><th>Pergunta</th><th>Alternativas</th><th>Tempo</th></tr>
+        ${lista.map((q, n) => `<tr><td>${n + 1}</td><td>${esc(q.texto)}</td><td>${q.opcoes.map((o, i) =>
+          `<div class="${i === q.correta ? 'ok' : ''}">${LETRAS[i]}) ${esc(o)}${i === q.correta ? ' ✔' : ''}</div>`).join('')}</td><td>${q.tempo}s</td></tr>`).join('')}
+        </table>`;
+      $salvar.disabled = !lista.length || erros.length > 0;
+      if (erros.length) $err.textContent = 'Corrija as linhas com problema na planilha e suba de novo.';
+    } catch (e) { $err.textContent = e.message; }
+  };
+
+  $salvar.onclick = async () => {
+    $salvar.disabled = true;
+    try {
+      await rpc('sipat_quiz_modelo_salvar', { p_senha: senha, p_titulo: document.getElementById('titulo').value.trim(), p_perguntas: perguntas });
+      $prev.innerHTML = '<p class="ok">✔ Quiz salvo! Ele já aparece na lista para escolher na sala.</p>';
+      document.getElementById('arq').value = ''; document.getElementById('titulo').value = '';
+      listar();
+    } catch (e) { $err.textContent = e.message; $salvar.disabled = false; }
+  };
+}
+
+async function lerPlanilha(f) {
+  let wb;
+  if (/\.csv$/i.test(f.name)) {
+    const buf = await f.arrayBuffer();
+    let txt = new TextDecoder('utf-8').decode(buf);
+    if (txt.includes('�')) txt = new TextDecoder('windows-1252').decode(buf); // CSV salvo pelo Excel
+    const l1 = txt.split(/\r?\n/)[0];
+    const sep = (l1.split(';').length > l1.split(',').length) ? ';' : ',';
+    wb = XLSX.read(txt, { type: 'string', FS: sep, raw: true });
+  } else {
+    wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
+  }
+  return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '', raw: false });
+}
+
+function converter(rows) {
+  const norm = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  const head = (rows[0] || []).map(norm);
+  // posição padrão: Pergunta, A, B, C, D, Correta, Tempo
+  const col = { q: 0, ops: [1, 2, 3, 4], cor: 5, t: 6 };
+  const temCabecalho = head.some(h => /pergunta|correta|resposta|gabarito/.test(h));
+  if (temCabecalho) {
+    head.forEach((h, i) => {
+      if (/^pergunta|^questao/.test(h)) col.q = i;
+      else if (/correta|resposta certa|gabarito|^resposta$/.test(h)) col.cor = i;
+      else if (/^tempo/.test(h)) col.t = i;
+      else {
+        const m = h.match(/^(?:opcao|alternativa|resposta)?\s*([abcd])\)?$/);
+        if (m) col.ops['abcd'.indexOf(m[1])] = i;
+      }
+    });
+  }
+  const lista = [], erros = [];
+  rows.slice(temCabecalho ? 1 : 0).forEach((r, n) => {
+    const linha = n + (temCabecalho ? 2 : 1);
+    const texto = String(r[col.q] ?? '').trim();
+    const brutas = col.ops.map(i => String(r[i] ?? '').trim());
+    if (!texto && brutas.every(o => !o)) return; // linha vazia
+    const opcoes = [], mapa = [];
+    brutas.forEach((o, i) => { if (o) { mapa[i] = opcoes.length; opcoes.push(o); } });
+    const c = norm(r[col.cor] ?? '');
+    let ci = -1;
+    if (/^[abcd]$/.test(c)) ci = 'abcd'.indexOf(c);
+    else if (/^[1-4]$/.test(c)) ci = +c - 1;
+    else ci = brutas.findIndex(o => o && norm(o) === c);
+    const correta = ci >= 0 ? mapa[ci] : undefined;
+    let tempo = parseInt(r[col.t], 10);
+    if (!(tempo >= 5)) tempo = 20;
+    if (!texto) return erros.push(`Linha ${linha}: pergunta vazia`);
+    if (opcoes.length < 2) return erros.push(`Linha ${linha}: precisa de pelo menos 2 alternativas`);
+    if (correta === undefined) return erros.push(`Linha ${linha}: coluna "Correta" deve ser A, B, C ou D (de uma alternativa preenchida)`);
+    lista.push({ texto, opcoes, correta, tempo: Math.min(tempo, 120) });
+  });
+  if (lista.length > 100) erros.push('Máximo de 100 perguntas');
+  return { lista, erros };
+}
+
+const MODELO = [
+  ['Pergunta', 'A', 'B', 'C', 'D', 'Correta', 'Tempo'],
+  ['O que significa a sigla SIPAT?', 'Semana Interna de Prevenção de Acidentes do Trabalho', 'Sistema Integrado de Proteção ao Trabalhador', 'Semana de Integração dos Profissionais da Área Técnica', 'Serviço Interno de Primeiros Atendimentos', 'A', 20],
+  ['O que significa a sigla EPI?', 'Equipamento de Prevenção Interna', 'Equipamento de Proteção Individual', 'Estrutura de Proteção Industrial', 'Equipe de Primeiros Inspetores', 'B', 15],
+  ['Qual Norma Regulamentadora trata da CIPA?', 'NR-6', 'NR-10', 'NR-5', 'NR-35', 'C', 20],
+  ['Pela NR-35, trabalho em altura é toda atividade acima de:', '1 metro', '1,5 metro', '3 metros', '2 metros', 'D', 20],
+  ['Ao ver uma condição insegura na área, o que você deve fazer?', 'Comunicar imediatamente o líder ou a CIPA', 'Esperar alguém se machucar', 'Resolver sozinho sem avisar ninguém', 'Ignorar, não é minha função', 'A', 20],
+];
+
+// =====================================================================
+// TELÃO: sala (2), pergunta (3), resultado (4), ranking (5), pódio
+// =====================================================================
+async function hostGame(codigo) {
+  const token = store.get('sq_host_' + codigo);
+  const senha = store.get('sq_senha');
+  if (!token) {
+    $app.innerHTML = `<div class="center"><div class="card"><h2>Telão indisponível</h2>
+      <p>Esta sala foi aberta em outro computador/navegador. Abra uma nova sala aqui.</p>
+      <button class="btn go" onclick="location.href='?adm'">Ir para o administrador</button></div></div>`;
+    return;
+  }
+  await loadQr().catch(() => {});
+  const joinUrl = baseUrl + '?c=' + codigo;
+  let st = null, viewKey = '', tela = 'stats', ocupado = false, bipUlt = null, modelos = [];
+
+  const acao = async a => {
+    if (ocupado) return; ocupado = true;
+    bipe(660, .05);
+    try { await rpc('sipat_quiz_host_acao', { p_codigo: codigo, p_token: token, p_acao: a }); tela = 'stats'; await atualizar(); }
+    catch (e) { alert(e.message); }
+    ocupado = false;
+  };
+  window.__acao = acao;
+  window.__tela = t => { tela = t; viewKey = ''; render(); };
+  window.__escolher = async id => {
+    if (!id) return;
+    try { await rpc('sipat_quiz_escolher', { p_codigo: codigo, p_token: token, p_modelo: id }); viewKey = ''; await atualizar(); }
+    catch (e) { alert(e.message); }
+  };
+
+  if (senha) modelos = await rpc('sipat_quiz_modelo_listar', { p_senha: senha }).catch(() => []);
+
+  const render = () => {
+    if (!st) return;
+    const prep = st.status === 'pergunta' && serverNow() < Date.parse(st.inicio_em);
+    const key = [st.status, st.idx, prep, tela, st.modelo_id].join('|');
+    if (key !== viewKey) { viewKey = key; draw(prep); }
+    tick();
+  };
+
+  const opcoesHtml = (q, mostrarCerta) => `<div class="opts">${q.opcoes.map((o, i) =>
+    `<div class="opt o${i} ${mostrarCerta ? (i === q.correta ? 'right' : 'fade') : 'pop'}" style="animation-delay:${i * .1}s"><span class="sh">${SHAPES[i]}</span><span>${esc(o)}</span>${mostrarCerta && i === q.correta ? '<span style="margin-left:auto">✔</span>' : ''}</div>`).join('')}</div>`;
+
+  const proximaBtn = () => st.idx + 1 >= st.total
+    ? `<button class="btn go" onclick="__acao('proxima')">Resultado final 🏆</button>`
+    : `<button class="btn go" onclick="__acao('proxima')">Liberar próxima pergunta ▶</button>`;
+
+  const RH = 64;
+  const rankingHtml = () => `<div class="rk" id="rk" style="height:${st.ranking.length * RH}px">${st.ranking.map(r => {
+    const de = Math.min(r.pos_ant, 11), sobe = st.idx > 0 ? r.pos_ant - r.pos : 0;
+    return `<div class="rk-row ${r.pos <= 3 ? 'top' + r.pos : ''}" data-to="${(r.pos - 1) * RH}" data-de="${r.pontos - r.ganhou}" data-ate="${r.pontos}"
+      style="transform:translateY(${(de - 1) * RH}px);${r.pos_ant > 10 ? 'opacity:0' : ''}">
+      <span>${r.pos}º</span><span class="rk-nome">${esc(r.nome)}</span>
+      <span class="rk-var">${sobe > 0 ? `<i class="up">▲${sobe}</i>` : sobe < 0 ? `<i class="down">▼${-sobe}</i>` : ''}</span>
+      <span class="rk-det">${r.acertos} acerto${r.acertos === 1 ? '' : 's'} · ${seg(r.tempo_ms)}</span>
+      <span class="rk-gan">${r.ganhou ? '+' + pts(r.ganhou) : ''}</span>
+      <span class="rk-pts">${pts(r.pontos - r.ganhou)}</span></div>`;
+  }).join('') || '<p style="text-align:center">Ninguém pontuou ainda</p>'}</div>`;
+
+  const animarRanking = () => setTimeout(() => {
+    document.querySelectorAll('.rk-row').forEach(el => {
+      el.style.transform = `translateY(${el.dataset.to}px)`; el.style.opacity = 1;
+      contar(el.querySelector('.rk-pts'), +el.dataset.de, +el.dataset.ate, 1400);
+    });
+  }, 900);
+
+  const draw = prep => {
+    const topo = `<div class="top"><div class="badge">${esc(st.titulo)}</div>
+      ${st.status !== 'lobby' && st.status !== 'fim' ? `<div class="badge">Pergunta ${st.idx + 1} de ${st.total}</div>` : ''}
+      <div class="badge">Código: <b>${esc(codigo)}</b> · ${st.jogadores} na sala</div></div>`;
+
+    if (st.status === 'lobby') {
+      // Tela 2: QR code, escolha do quiz e quem entrou
+      const opts = modelos.map(m => `<option value="${m.id}" ${m.id === st.modelo_id ? 'selected' : ''}>${esc(m.titulo)} (${m.n} perguntas)</option>`).join('');
+      $app.innerHTML = `<div class="wrap">
+        <div class="lobby">
+          <div style="text-align:center">${brand('sm')}<div class="qr pop" id="qr" style="margin-top:12px"></div>
+            <p>Aponte a câmera do celular<br>ou acesse <b>${esc(joinUrl.replace(/^https?:\/\//, ''))}</b></p>
+            <div style="opacity:.8">Código</div><div class="code">${esc(codigo)}</div></div>
+          <div>
+            <div class="pick"><b>Qual quiz vamos jogar?</b>
+              ${modelos.length ? `<select onchange="__escolher(this.value)"><option value="">— escolha o quiz —</option>${opts}</select>`
+                : `<p class="small">Nenhum quiz cadastrado. <a style="color:var(--accent)" href="?adm=quizzes">Cadastrar quiz</a></p>`}
+            </div>
+            <h1><span id="nj">0</span> participantes</h1>
+            <div class="chips" id="chips"></div>
+            <div class="actions" style="justify-content:flex-start">
+              <button class="btn go" style="font-size:22px" ${st.total ? '' : 'disabled title="Escolha o quiz primeiro"'} onclick="__acao('proxima')">Começar quiz ▶</button></div></div>
+        </div></div>`;
+      if (window.QRCode) new QRCode(document.getElementById('qr'), { text: joinUrl, width: 300, height: 300, correctLevel: QRCode.CorrectLevel.M });
+    } else if (st.status === 'pergunta' && prep) {
+      $app.innerHTML = `<div class="wrap">${topo}<div class="center" style="min-height:75vh">
+        <div class="badge">Pergunta ${st.idx + 1} de ${st.total}</div>
+        <div class="qtext pop" style="margin-top:20px;max-width:1100px">${esc(st.pergunta.texto)}</div>
+        <div class="huge" id="cd"></div><p style="font-size:22px">Prepare-se!</p></div></div>`;
+    } else if (st.status === 'pergunta') {
+      // Tela 3: pergunta, cronômetro e quantos já responderam
+      $app.innerHTML = `<div class="wrap">${topo}
+        <div class="qtext">${esc(st.pergunta.texto)}</div>
+        <div class="mid">
+          <div class="ring" id="ring"><svg width="150" height="150"><circle cx="75" cy="75" r="64" stroke="rgba(255,255,255,.2)" stroke-width="12" fill="none"/>
+            <circle class="fg" id="arc" cx="75" cy="75" r="64" stroke="var(--accent)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="0"/></svg><b id="tm"></b></div>
+          <div class="prog"><div class="n"><span id="nr">0</span> <span style="font-size:28px;opacity:.8">de <span id="nj">0</span> responderam</span></div>
+            <div class="bar"><i id="pb" style="width:0"></i></div></div>
+          <button class="btn warn" style="width:auto" onclick="__acao('encerrar')">Finalizar pergunta ⏹</button></div>
+        ${opcoesHtml(st.pergunta, false)}</div>`;
+    } else if (st.status === 'resultado' && tela === 'stats') {
+      // Tela 4: quantos acertaram, mais rápido, mais lento e média
+      const d = st.distribuicao || [], max = Math.max(1, ...d), s = st.stats || {};
+      const tot = d.reduce((a, b) => a + b, 0), perc = st.jogadores ? Math.round(100 * (s.acertos || 0) / st.jogadores) : 0;
+      $app.innerHTML = `<div class="wrap">${topo}
+        <div class="qtext" style="font-size:26px;padding:14px">${esc(st.pergunta.texto)}</div>
+        <div class="stats">
+          <div class="stat main"><div class="ic">🎯</div><div class="v"><span id="sa">0</span> <span style="font-size:22px">de ${st.jogadores}</span></div><div class="l" style="color:#333">acertaram (${perc}%)</div></div>
+          <div class="stat" style="animation-delay:.25s"><div class="ic">⚡</div><div class="l">Mais rápido</div><div class="v">${s.rapido ? seg(s.rapido.ms) : '–'}</div><div class="nm">${s.rapido ? esc(s.rapido.nome) : 'ninguém acertou'}</div></div>
+          <div class="stat" style="animation-delay:.5s"><div class="ic">⏱️</div><div class="l">Tempo médio</div><div class="v">${s.media_ms != null ? seg(s.media_ms) : '–'}</div><div class="nm">de quem acertou</div></div>
+          <div class="stat" style="animation-delay:.75s"><div class="ic">🐢</div><div class="l">Mais lento</div><div class="v">${s.lento ? seg(s.lento.ms) : '–'}</div><div class="nm">${s.lento ? esc(s.lento.nome) : '–'}</div></div>
+        </div>
+        <div class="dist">${d.map((n, i) => `<div class="col"><b class="cnt" data-n="${n}">0</b><i class="o${i}" data-h="${(n / max) * 170 + 6}" style="${i === st.pergunta.correta ? '' : 'opacity:.35'}"></i>
+          <div class="lb">${SHAPES[i]}${i === st.pergunta.correta ? ' ✔' : ''}</div></div>`).join('')}</div>
+        ${opcoesHtml(st.pergunta, true)}
+        <div class="actions">
+          <button class="btn light" onclick="__tela('rank')">Ver ranking 🏆</button>
+          ${proximaBtn()}</div></div>`;
+      contar(document.getElementById('sa'), 0, s.acertos || 0, 1200);
+      if ((s.acertos || 0) > 0) bipe(1200, .2);
+      setTimeout(() => document.querySelectorAll('.dist i').forEach(el => el.style.height = el.dataset.h + 'px'), 50);
+      document.querySelectorAll('.dist .cnt').forEach(el => contar(el, 0, +el.dataset.n, 1200));
+    } else if (st.status === 'resultado') {
+      // Tela 5: ranking animado
+      $app.innerHTML = `<div class="wrap">${topo}<h1 style="text-align:center;font-size:44px" class="pop">🏆 Ranking</h1>
+        ${rankingHtml()}
+        <div class="actions"><button class="btn light" onclick="__tela('stats')">◀ Resultado da pergunta</button>${proximaBtn()}</div></div>`;
+      animarRanking();
+    } else if (st.status === 'fim') {
+      const r = st.ranking, cores = ['#ffd700', '#e3e7ee', '#eab27a'], alt = [240, 170, 120];
+      const ordem = [1, 0, 2].filter(i => r[i]);
+      $app.innerHTML = `<div class="wrap">${topo}<h1 class="pop" style="text-align:center;font-size:52px;display:flex;align-items:center;justify-content:center;gap:16px">
+          <img class="presente" src="img/presente.png" alt="">Quiz finalizado! Parabéns!<img class="presente" src="img/presente.png" alt=""></h1>
+        <div class="podium">${ordem.map(i => `<div class="p rise" style="animation-delay:${[1.2, .6, 1.8][i]}s">
+          <div class="nm">${esc(r[i].nome)}</div><div><b>${pts(r[i].pontos)} pts</b></div>
+          <div class="small" style="opacity:.85">${r[i].acertos} acerto${r[i].acertos === 1 ? '' : 's'} · ${seg(r[i].tempo_ms)}</div>
+          <div class="blk" style="background:${cores[i]};height:${alt[i]}px;animation-delay:${[1.2, .6, 1.8][i]}s">${i + 1}º</div></div>`).join('')}</div>
+        ${r.length > 3 ? `<div style="max-width:1000px;margin:0 auto">${r.slice(3).map(x => `<div class="rk-row rise" style="position:relative;margin:8px 0">
+          <span>${x.pos}º</span><span class="rk-nome">${esc(x.nome)}</span><span></span><span class="rk-det">${x.acertos} acertos · ${seg(x.tempo_ms)}</span><span></span><span class="rk-pts">${pts(x.pontos)}</span></div>`).join('')}</div>` : ''}
+        <div class="actions"><button class="btn ghost" onclick="location.href='?adm'">Voltar ao início</button></div></div>`;
+      setTimeout(() => { confete(9000); bipe(523, .15); setTimeout(() => bipe(659, .15), 150); setTimeout(() => bipe(784, .3), 300); }, 1800);
+    }
+  };
+
+  const tick = () => {
+    const now = serverNow();
+    const cd = document.getElementById('cd');
+    if (cd) {
+      const n = Math.max(1, Math.ceil((Date.parse(st.inicio_em) - now) / 1000));
+      if (cd.textContent !== String(n)) { cd.textContent = n; cd.classList.remove('pop'); void cd.offsetWidth; cd.classList.add('pop'); bipe(440, .08); }
+    }
+    const tm = document.getElementById('tm');
+    if (tm) {
+      const ini = Date.parse(st.inicio_em), fim = Date.parse(st.fim_em), rest = Math.max(0, fim - now), s = Math.ceil(rest / 1000);
+      tm.textContent = s;
+      document.getElementById('arc').setAttribute('stroke-dashoffset', 402 * (1 - rest / (fim - ini)));
+      document.getElementById('ring').classList.toggle('hot', rest <= 5000);
+      if (rest <= 5000 && s > 0 && s !== bipUlt) { bipUlt = s; bipe(s <= 3 ? 1000 : 800, .1); }
+    }
+    const nj = document.getElementById('nj'); if (nj) nj.textContent = st.jogadores;
+    const nr = document.getElementById('nr'); if (nr) nr.textContent = st.respostas;
+    const pb = document.getElementById('pb'); if (pb) pb.style.width = (st.jogadores ? 100 * st.respostas / st.jogadores : 0) + '%';
+    const chips = document.getElementById('chips');
+    if (chips) {
+      const atuais = new Set([...chips.children].map(c => c.textContent));
+      st.nomes.slice().reverse().forEach(n => {
+        if (!atuais.has(n)) { const c = document.createElement('span'); c.className = 'chip'; c.textContent = n; chips.prepend(c); }
+      });
+    }
+  };
+
+  const atualizar = async () => {
+    try { st = await rpc('sipat_quiz_host_estado', { p_codigo: codigo, p_token: token }); }
+    catch (e) {
+      if (!/não encontrado/i.test(e.message)) throw e;
+      store.del('sq_host_ultimo');
+      location.href = '?adm';
+    }
+    render();
+  };
+  poller(atualizar, 1000);
+  setInterval(render, 150);
+}
+</script>
+</body>
+</html>
