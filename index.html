@@ -485,6 +485,16 @@ function playerStart(codigo) {
   $nome.onkeydown = e => { if (e.key === 'Enter') entrar(); };
 }
 
+// Dica no celular depois de cada pergunta (sem revelar a posição no ranking)
+function dicaJogador(st) {
+  const restantes = st.total - st.idx - 1, seq = st.sequencia || 0;
+  if (restantes === 1) return '⚡ Prepare-se: a próxima é a <b>última</b> e vale o <b>DOBRO</b>!';
+  if (seq >= 3) return '🔥 Você está pegando fogo! Cada acerto seguido vale <b>+200</b>.';
+  if (seq > 0 && restantes >= 3 - seq) return `🔥 ${seq} acerto${seq > 1 ? 's' : ''} seguido${seq > 1 ? 's' : ''}! Mais ${3 - seq} e você ganha <b>+200</b>!`;
+  if (restantes >= 3) return '🔥 Acerte <b>3 perguntas seguidas</b> e ganhe <b>+200 pontos</b> de bônus!';
+  return '⏱ Acelere! O <b>tempo de resposta</b> muda sua pontuação. E a última vale o <b>DOBRO</b>!';
+}
+
 function playerGame(codigo, me) {
   let st = null, viewKey = '', enviando = null, minha = null, cdUlt = null;
 
@@ -534,10 +544,12 @@ function playerGame(codigo, me) {
         ${ok && st.bonus ? `<p class="rise" style="margin:8px 0 0"><b>⚡ Pergunta bônus: pontos em dobro!</b></p>` : ''}
         ${st.bonus_seq > 0 ? `<p class="rise" style="margin:8px 0 0;font-size:20px"><b>🔥 ${st.sequencia} acertos seguidos! +${st.bonus_seq} de bônus</b></p>` : ''}
         ${!ok && st.correta != null ? `<p class="rise">Resposta certa: <b>${esc(st.pergunta.opcoes[st.correta])}</b></p>` : ''}
-        <p class="rise" style="font-size:22px;margin-top:24px;animation-delay:.5s">Você está em <b>${st.posicao}º lugar</b><br>${pts(st.pontos)} pontos</p>
-        <p class="rise" style="font-size:18px;background:rgba(0,0,0,.2);padding:10px 16px;border-radius:12px;animation-delay:.7s">${st.acima_nome
-          ? `🎯 Faltam <b>${pts(st.acima_diff)} pontos</b> para você passar <b>${esc(st.acima_nome)}</b>!`
-          : '👑 Você está na <b>liderança</b>! Segura!'}</p>
+        <p class="rise" style="font-size:22px;margin-top:24px;animation-delay:.5s">Você tem <b>${pts(st.pontos)} pontos</b></p>
+        ${st.bonus ? `<p class="rise" style="font-size:20px;animation-delay:.7s">🥁 O resultado sai no telão. Fique de olho!</p>` : `
+        <p class="rise" style="font-size:18px;background:rgba(0,0,0,.2);padding:10px 16px;border-radius:12px;animation-delay:.7s">${st.em_podio
+          ? '🏆 Você está no <b>pódio</b>! Não deixa escapar!'
+          : `🎯 Faltam <b>${pts(st.podio_diff)} pontos</b> para você entrar no <b>pódio</b>!`}</p>
+        <p class="rise" style="font-size:17px;margin:0;animation-delay:.9s">${dicaJogador(st)}</p>`}
         <p class="small" style="opacity:.8">${st.bonus ? 'Aguarde o resultado final 🏆' : 'Aguarde a próxima pergunta'}</p></div>`;
       if (ok) contar(document.getElementById('gan'), 0, st.ganhou, 1000);
     } else if (st.status === 'fim' && !(st.revelado >= 4)) {
@@ -1020,7 +1032,10 @@ async function hostGame(codigo) {
       const d = st.distribuicao || [], s = st.stats || {}, tot = Math.max(1, d.reduce((a, b) => a + b, 0));
       const ac = s.acertos || 0, er = s.erros || 0, na = Math.max(0, st.jogadores - ac - er);
       const taxa = st.jogadores ? ac / st.jogadores : 0;
-      const fala = !st.jogadores ? 'Cadê a galera? 😅' : taxa >= .8 ? 'Mandaram muito bem, galera! 👏' : taxa >= .5 ? 'Boa! A maioria acertou! 💪' : taxa > 0 ? 'Essa foi difícil, hein? 🤔' : 'Ninguém acertou! Presta atenção na palestra! 😱';
+      // Na última pergunta não mostramos nomes nem ranking: o resultado é revelado no pódio
+      const ultima = st.idx + 1 >= st.total;
+      const segredo = '🤫 só no pódio!';
+      const fala = ultima ? 'Última pergunta encerrada! Quem será o grande <b>campeão</b>? 🥁' : !st.jogadores ? 'Cadê a galera? 😅' : taxa >= .8 ? 'Mandaram muito bem, galera! 👏' : taxa >= .5 ? 'Boa! A maioria acertou! 💪' : taxa > 0 ? 'Essa foi difícil, hein? 🤔' : 'Ninguém acertou! Presta atenção na palestra! 😱';
       $app.innerHTML = `<div class="wrap">${topo}
         <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px">
           <h1 class="pop" style="font-size:46px;margin:0">📊 Como a galera foi</h1>${masc(fala)}</div>
@@ -1034,12 +1049,14 @@ async function hostGame(codigo) {
             <div class="letras">${d.map((n, i) => `<div class="${i === st.pergunta.correta ? 'certa' : ''}"><span>${LETRAS[i]}</span><b data-n="${n}">0</b> ${n === 1 ? 'pessoa' : 'pessoas'}${i === st.pergunta.correta ? ' ✔' : ''}</div>`).join('')}</div></div>
         </div>
         <div class="kpis" style="margin-top:14px">
-          <div class="kpi t" style="animation-delay:.4s"><div class="l">⚡ Mais rápida</div><div class="v">${s.rapido ? seg(s.rapido.ms) : '–'}</div><div class="nm">${s.rapido ? esc(s.rapido.nome) : 'ninguém acertou'}</div></div>
+          <div class="kpi t" style="animation-delay:.4s"><div class="l">⚡ Mais rápida</div><div class="v">${s.rapido ? seg(s.rapido.ms) : '–'}</div><div class="nm">${!s.rapido ? 'ninguém acertou' : ultima ? segredo : esc(s.rapido.nome)}</div></div>
           <div class="kpi t" style="animation-delay:.55s"><div class="l">⏱️ Tempo médio</div><div class="v">${s.media_ms != null ? seg(s.media_ms) : '–'}</div><div class="nm">de quem acertou</div></div>
-          <div class="kpi t" style="animation-delay:.7s"><div class="l">🐢 Mais lenta</div><div class="v">${s.lento ? seg(s.lento.ms) : '–'}</div><div class="nm">${s.lento ? esc(s.lento.nome) : '–'}</div></div>
+          <div class="kpi t" style="animation-delay:.7s"><div class="l">🐢 Mais lenta</div><div class="v">${s.lento ? seg(s.lento.ms) : '–'}</div><div class="nm">${!s.lento ? '–' : ultima ? segredo : esc(s.lento.nome)}</div></div>
         </div>
         <div class="actions"><button class="btn light" onclick="__tela('resposta')">◀ Resposta</button>
-          <button class="btn go" style="font-size:22px" onclick="__tela('rank')">Ver ranking 🏆</button></div></div>${selo}`;
+          ${ultima
+            ? `<button class="btn go" style="font-size:24px;padding:18px 34px" onclick="__acao('proxima')">🥁 Revelar os vencedores 🏆</button>`
+            : `<button class="btn go" style="font-size:22px" onclick="__tela('rank')">Ver ranking 🏆</button>`}</div></div>${selo}`;
       document.querySelectorAll('[data-n]').forEach(el => contar(el, 0, +el.dataset.n, 1200));
       setTimeout(() => document.querySelectorAll('.donut circle[data-len]').forEach(el => {
         el.style.strokeDasharray = `${el.dataset.len} ${DC - el.dataset.len}`;
