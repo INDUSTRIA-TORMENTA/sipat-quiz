@@ -166,6 +166,16 @@
   .reveal.p1 { background: linear-gradient(160deg, #fff3a6, #ffd700 50%, #e0a800); } .reveal.p2 { background: linear-gradient(160deg, #fff, #d9dee6); } .reveal.p3 { background: linear-gradient(160deg, #ffe0c0, #e39b5c); }
   .mini { display: flex; gap: 14px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
   .mini .reveal { min-width: 0; padding: 10px 22px; animation: none; } .mini .reveal .lugar { font-size: 34px; } .mini .reveal .quem { font-size: 26px; } .mini .reveal .det { font-size: 15px; }
+  .geral { width: 100%; border-collapse: separate; border-spacing: 0 6px; font-weight: 800; font-size: 18px; }
+  .geral th { font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); text-align: right; padding: 4px 10px; vertical-align: bottom; max-width: 190px; }
+  .geral th:nth-child(2), .geral td:nth-child(2) { text-align: left; }
+  .geral td { background: rgba(255,255,255,.1); padding: 8px 10px; text-align: right; white-space: nowrap; }
+  .geral td:first-child { border-radius: 10px 0 0 10px; text-align: center; } .geral td:last-child { border-radius: 0 10px 10px 0; color: var(--accent); font-size: 22px; }
+  .geral td:first-child b { display: inline-block; min-width: 44px; background: var(--accent); color: var(--ink); border-radius: 8px; font-family: 'Lilita One', sans-serif; font-weight: 400; }
+  .geral tr.top3 td { background: rgba(255,204,0,.18); }
+  .geral td.nome { white-space: normal; max-width: 320px; } .geral td.zero { color: rgba(255,255,255,.35); }
+  .geral th button { display: block; margin: 4px 0 0 auto; background: none; border: 1px solid rgba(255,255,255,.35); color: #fff; border-radius: 6px; font-size: 11px; padding: 2px 6px; cursor: pointer; }
+  .tabgeral { overflow-x: auto; }
   .lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px 14px; max-height: 52vh; overflow: hidden; align-content: start; }
   .lista div { display: flex; gap: 10px; align-items: center; background: rgba(255,255,255,.1); border-radius: 10px; padding: 6px 10px; margin-bottom: 6px; font-weight: 800; font-size: 18px; animation: rise .5s both; }
   .lista div b { flex: none; min-width: 44px; text-align: center; background: var(--accent); color: var(--ink); border-radius: 8px; font-family: 'Lilita One', sans-serif; font-weight: 400; }
@@ -456,7 +466,7 @@ function playerStart(codigo) {
           <input id="cod" type="tel" inputmode="numeric" maxlength="6" placeholder="000000" value="${esc(codigo)}">
         </div>
         <label class="muted">Digite seu nome</label>
-        <input id="nome" type="text" maxlength="30" placeholder="Nome e setor" autocomplete="off">
+        <input id="nome" type="text" maxlength="30" placeholder="Nome e setor" autocomplete="off" value="${esc(store.get('sq_nome') || '')}">
         <button class="btn go" id="entrar">Entrar no quiz</button>
         <div class="err" id="err"></div>
       </div>
@@ -474,6 +484,7 @@ function playerStart(codigo) {
     try {
       const me = await rpc('sipat_quiz_entrar', { p_codigo: c, p_nome: n });
       store.set('sq_player_' + c, me);
+      store.set('sq_nome', n); // mesmo nome nos 4 dias = soma certa no ranking geral
       history.replaceState(null, '', '?c=' + c);
       playerGame(c, me);
     } catch (e) {
@@ -635,6 +646,7 @@ async function pedirSenha() {
 async function admin(tela) {
   const senha = await pedirSenha();
   if (tela === 'quizzes') return adminQuizzes(senha);
+  if (tela === 'geral') return adminGeral(senha);
   // Tela 1: entrada
   const sala = store.get('sq_host_ultimo');
   $app.innerHTML = `<img class="planta rise" src="img/planta.png" alt=""><div class="center" style="position:relative;z-index:1">
@@ -642,6 +654,7 @@ async function admin(tela) {
     <div class="actions rise" style="margin-top:40px;animation-delay:.3s">
       <button class="btn go" id="abrir" style="font-size:24px;padding:20px 34px">Abrir sala do quiz ▶</button>
       <button class="btn ghost" onclick="location.href='?adm=quizzes'">Cadastrar / ver quizzes</button>
+      <button class="btn ghost" onclick="location.href='?adm=geral'">🏆 Ranking geral da SIPAT</button>
     </div>
     ${sala ? `<button class="link" style="margin-top:14px" onclick="location.href='?host=${esc(sala.codigo)}'">Voltar para a sala ${esc(sala.codigo)}</button>` : ''}
     <div class="err" id="err"></div></div>`;
@@ -653,6 +666,61 @@ async function admin(tela) {
       location.href = '?host=' + r.codigo;
     } catch (e) { document.getElementById('err').textContent = e.message; }
   };
+}
+
+// Ranking geral: soma das palestras (cada quiz finalizado guarda o resultado no acumulado)
+async function adminGeral(senha) {
+  let dados = null;
+  const nomeCurto = t => t.replace(/^\s*\d{1,2}\/\d{1,2}\s*[–-]\s*/, '');
+  const desenhar = () => {
+    const pal = dados.palestras, rk = dados.ranking;
+    const card = p => {
+      const x = rk[p - 1];
+      return `<div class="reveal p${p}"><div class="lugar">${['🥇', '🥈', '🥉'][p - 1]} ${p}º lugar</div>
+        <div class="quem">${x ? esc(x.nome) : '—'}</div>
+        ${x ? `<div class="det">${pts(x.total)} pontos · ${x.acertos} acerto${x.acertos === 1 ? '' : 's'} · ${x.n} palestra${x.n === 1 ? '' : 's'}</div>` : ''}</div>`;
+    };
+    $app.innerHTML = `<div class="wrap">
+      <div class="top">${brand('sm')}<div class="actions" style="margin:0">
+        <button class="btn ghost" style="width:auto" id="xls">⬇ Excel</button>
+        <button class="btn ghost" style="width:auto" onclick="location.href='?adm'">◀ Voltar</button></div></div>
+      <h1 class="pop" style="text-align:center;font-size:48px;margin:4px 0">🏆 Ranking geral da SIPAT</h1>
+      <p style="text-align:center;margin:0 0 18px" class="rise">Soma dos pontos de todas as palestras · ${rk.length} participante${rk.length === 1 ? '' : 's'} · ${pal.length} palestra${pal.length === 1 ? '' : 's'}</p>
+      ${rk.length ? `<div class="mini">${card(1)}${card(2)}${card(3)}</div>
+      <div class="tabgeral"><table class="geral"><thead><tr><th>Pos.</th><th>Nome</th>
+        ${pal.map(p => `<th title="${esc(p.titulo)}">${esc(nomeCurto(p.titulo))}<button data-zp="${p.id}">zerar só esta</button></th>`).join('')}<th>Total</th></tr></thead>
+        <tbody>${rk.map(x => `<tr class="${x.pos <= 3 ? 'top3' : ''}"><td><b>${x.pos}º</b></td><td class="nome">${esc(x.nome)}</td>
+          ${pal.map(p => x.por[p.id] == null ? '<td class="zero">—</td>' : `<td>${pts(x.por[p.id])}</td>`).join('')}<td>${pts(x.total)}</td></tr>`).join('')}</tbody></table></div>`
+      : `<div class="card" style="margin:30px auto;text-align:center"><h2>Ainda não há pontos</h2>
+          <p>Cada quiz que chegar ao fim entra aqui automaticamente.</p></div>`}
+      <p class="small" style="text-align:center;opacity:.8;margin-top:18px">A mesma pessoa é somada pelo <b>nome digitado</b> (maiúsculas e acentos não importam).
+        Reiniciar a sala não apaga o acumulado. Jogar de novo o mesmo quiz substitui a nota daquela palestra.</p>
+      <div class="actions"><button class="btn warn" style="width:auto" id="zerar">🗑 Zerar o acumulado (todas as palestras)</button></div>
+      <div class="err" id="err"></div></div>`;
+    document.getElementById('zerar').onclick = async () => {
+      if (!confirm('Apagar o ranking geral de TODAS as palestras?\n\nAs salas e os quizzes cadastrados não são apagados.')) return;
+      if (prompt('Para confirmar, digite ZERAR') !== 'ZERAR') return;
+      await rpc('sipat_quiz_geral_zerar', { p_senha: senha, p_modelo: null }); carregar();
+    };
+    document.querySelectorAll('[data-zp]').forEach(b => b.onclick = async () => {
+      const p = pal.find(x => x.id === b.dataset.zp);
+      if (!confirm(`Tirar do ranking geral só a palestra:\n${p.titulo}?`)) return;
+      await rpc('sipat_quiz_geral_zerar', { p_senha: senha, p_modelo: p.id }); carregar();
+    });
+    document.getElementById('xls').onclick = async () => {
+      await loadXlsx();
+      const linhas = [['Posição', 'Nome', ...pal.map(p => p.titulo), 'Total', 'Acertos']]
+        .concat(rk.map(x => [x.pos, x.nome, ...pal.map(p => x.por[p.id] ?? ''), x.total, x.acertos]));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(linhas), 'Ranking geral');
+      XLSX.writeFile(wb, 'ranking-geral-sipat-2026.xlsx');
+    };
+  };
+  const carregar = async () => {
+    try { dados = await rpc('sipat_quiz_geral', { p_senha: senha }); desenhar(); }
+    catch (e) { $app.innerHTML = `<div class="center"><div class="err">${esc(e.message)}</div></div>`; }
+  };
+  carregar();
 }
 
 // Tela 6: cadastro de quizzes (só múltipla escolha)
@@ -1108,6 +1176,7 @@ async function hostGame(codigo) {
           <div class="mini">${card(1)}${card(2)}${card(3)}</div>
           <div class="lista" id="lista">${cl.map((x, i) => `<div style="animation-delay:${Math.min(i, 40) * .03}s"><b>${x.pos}º</b><span>${esc(x.nome)}</span><small>${pts(x.pontos)}</small></div>`).join('')}</div>
           <div class="actions"><button class="btn light" onclick="__reiniciar()">↺ Reiniciar quiz</button>
+            <button class="btn ghost" onclick="location.href='?adm=geral'">🏆 Ranking geral</button>
             <button class="btn ghost" onclick="location.href='?adm'">Voltar ao início</button></div>`;
       }
       $app.innerHTML = `<div class="wrap">${topo}${corpo}</div>${selo}`;
