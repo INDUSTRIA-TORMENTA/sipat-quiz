@@ -72,6 +72,11 @@
   .masc .fala { position: relative; background: #fff; color: var(--ink); border-radius: 20px; padding: 16px 22px; font-family: 'Lilita One', sans-serif; font-size: 28px; line-height: 1.15; animation: pop .6s .3s cubic-bezier(.2,1.4,.4,1) both; box-shadow: 0 8px 20px rgba(0,0,0,.3); }
   .masc .fala::before { content: ''; position: absolute; left: -18px; top: 50%; margin-top: -12px; border: 12px solid transparent; border-right: 18px solid #fff; border-left: 0; }
   .masc .fala b { color: var(--d); }
+  .masc .fala .es, .qes, .opt .oes { display: block; font-family: 'Nunito', system-ui, sans-serif; font-style: italic; font-weight: 700; }
+  .masc .fala .es { font-size: .6em; color: #5d6b62; margin-top: 6px; } .masc .fala .es b { color: inherit; }
+  .qes { font-size: .55em; opacity: .75; margin-top: 8px; }
+  .opt .oes { font-size: .7em; opacity: .8; margin-top: 2px; }
+  .langbtn { position: fixed; top: 12px; right: 12px; z-index: 6; background: rgba(0,0,0,.35); color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; padding: 6px 12px; font-weight: 800; font-size: 14px; cursor: pointer; }
   .masc.big img { width: 300px; } .masc.big .fala { font-size: 40px; }
   .selo { position: fixed; right: 18px; bottom: 12px; width: 150px; opacity: .9; pointer-events: none; z-index: 0; }
 
@@ -314,6 +319,37 @@ const store = {
   del(k) { try { localStorage.removeItem(k); } catch {} },
 };
 
+// Idioma do celular (português ou espanhol), lembrado no aparelho
+let LANG = store.get('sq_lang');
+const L = (pt, es) => LANG === 'es' ? es : pt;
+const ERROS_ES = {
+  'Código não encontrado': 'Código no encontrado', 'Este quiz já terminou': 'Este quiz ya terminó',
+  'Digite seu nome': 'Escribe tu nombre', 'Quiz lotado': 'Quiz lleno', 'Falha de conexão': 'Falla de conexión',
+  'Jogador não encontrado': 'Jugador no encontrado',
+};
+const trErro = m => LANG === 'es' ? (ERROS_ES[m] || m) : m;
+// Texto da pergunta e das alternativas no idioma escolhido (sem tradução, fica em português)
+const qTexto = q => (LANG === 'es' && q.texto_es) || q.texto;
+const qOpcoes = q => (LANG === 'es' && q.opcoes_es && q.opcoes_es.length === q.opcoes.length) ? q.opcoes_es : q.opcoes;
+// Telão: fala em português com a tradução em espanhol logo abaixo
+const bi = (pt, es) => `${pt}<span class="es">${es}</span>`;
+
+function escolherIdioma(depois) {
+  $app.innerHTML = `<div class="center"><div class="pop">${brand('sm')}</div>
+    <div class="card rise" style="margin-top:20px;text-align:center">
+      <h2 style="margin-bottom:4px">Escolha o idioma</h2><p class="muted" style="margin-top:0">Elige el idioma</p>
+      <button class="btn go" data-l="pt" style="font-size:24px;padding:18px">Português</button>
+      <button class="btn primary" data-l="es" style="font-size:24px;padding:18px;margin-top:12px">Español</button></div></div>`;
+  $app.querySelectorAll('[data-l]').forEach(b => b.onclick = () => { LANG = b.dataset.l; store.set('sq_lang', LANG); depois(); });
+}
+// Botão fixo para trocar o idioma a qualquer momento
+function botaoIdioma(aoTrocar) {
+  let b = document.getElementById('btn-lang');
+  if (!b) { b = document.createElement('button'); b.id = 'btn-lang'; b.className = 'langbtn'; document.body.appendChild(b); }
+  b.textContent = LANG === 'es' ? '🌐 Português' : '🌐 Español';
+  b.onclick = () => { LANG = LANG === 'es' ? 'pt' : 'es'; store.set('sq_lang', LANG); botaoIdioma(aoTrocar); aoTrocar(); };
+}
+
 // Marca da SIPAT 2026 (imagens em img/, tiradas da apresentação oficial)
 const brand = (cls = '') => `<div class="brand ${cls}">
   <div class="tor"><img src="img/raio.png" alt=""><span><small>Sementes</small>TORMENTA</span></div>
@@ -455,6 +491,7 @@ else playerStart(params.get('c') || '');
 // CELULAR DO PARTICIPANTE
 // =====================================================================
 function playerStart(codigo) {
+  if (LANG !== 'pt' && LANG !== 'es') return escolherIdioma(() => playerStart(codigo));
   const salvo = codigo && store.get('sq_player_' + codigo);
   if (salvo) return playerGame(codigo, salvo);
   $app.innerHTML = `
@@ -462,22 +499,23 @@ function playerStart(codigo) {
       <div class="pop">${brand('sm')}</div>
       <div class="card rise" style="margin-top:20px">
         <div style="${codigo ? 'display:none' : ''}">
-          <label class="muted">Código do quiz</label>
+          <label class="muted">${L('Código do quiz', 'Código del quiz')}</label>
           <input id="cod" type="tel" inputmode="numeric" maxlength="6" placeholder="000000" value="${esc(codigo)}">
         </div>
-        <label class="muted">Digite seu nome</label>
-        <input id="nome" type="text" maxlength="30" placeholder="Nome e setor" autocomplete="off" value="${esc(store.get('sq_nome') || '')}">
-        <button class="btn go" id="entrar">Entrar no quiz</button>
+        <label class="muted">${L('Digite seu nome', 'Escribe tu nombre')}</label>
+        <input id="nome" type="text" maxlength="30" placeholder="${L('Nome e setor', 'Nombre y sector')}" autocomplete="off" value="${esc(store.get('sq_nome') || '')}">
+        <button class="btn go" id="entrar">${L('Entrar no quiz', 'Entrar al quiz')}</button>
         <div class="err" id="err"></div>
       </div>
       <button class="link" onclick="location.href='?adm'">Administrador</button>
     </div>`;
   const $cod = document.getElementById('cod'), $nome = document.getElementById('nome'), $err = document.getElementById('err');
+  botaoIdioma(() => playerStart(codigo));
   (codigo ? $nome : $cod).focus();
   const entrar = async () => {
     const c = $cod.value.trim(), n = $nome.value.trim();
-    if (c.length !== 6) return $err.textContent = 'Digite o código de 6 números';
-    if (!n) return $err.textContent = 'Digite seu nome';
+    if (c.length !== 6) return $err.textContent = L('Digite o código de 6 números', 'Escribe el código de 6 números');
+    if (!n) return $err.textContent = L('Digite seu nome', 'Escribe tu nombre');
     const prev = store.get('sq_player_' + c);
     if (prev) return playerGame(c, prev);
     document.getElementById('entrar').disabled = true;
@@ -488,7 +526,7 @@ function playerStart(codigo) {
       history.replaceState(null, '', '?c=' + c);
       playerGame(c, me);
     } catch (e) {
-      $err.textContent = e.message;
+      $err.textContent = trErro(e.message);
       document.getElementById('entrar').disabled = false;
     }
   };
@@ -499,15 +537,17 @@ function playerStart(codigo) {
 // Dica no celular depois de cada pergunta (sem revelar a posição no ranking)
 function dicaJogador(st) {
   const restantes = st.total - st.idx - 1, seq = st.sequencia || 0;
-  if (restantes === 1) return '⚡ Prepare-se: a próxima é a <b>última</b> e vale o <b>DOBRO</b>!';
-  if (seq >= 3) return '🔥 Você está pegando fogo! Cada acerto seguido vale <b>+200</b>.';
-  if (seq > 0 && restantes >= 3 - seq) return `🔥 ${seq} acerto${seq > 1 ? 's' : ''} seguido${seq > 1 ? 's' : ''}! Mais ${3 - seq} e você ganha <b>+200</b>!`;
-  if (restantes >= 3) return '🔥 Acerte <b>3 perguntas seguidas</b> e ganhe <b>+200 pontos</b> de bônus!';
-  return '⏱ Acelere! O <b>tempo de resposta</b> muda sua pontuação. E a última vale o <b>DOBRO</b>!';
+  const pl = seq > 1 ? 's' : '';
+  if (restantes === 1) return L('⚡ Prepare-se: a próxima é a <b>última</b> e vale o <b>DOBRO</b>!', '⚡ ¡Prepárate: la próxima es la <b>última</b> y vale el <b>DOBLE</b>!');
+  if (seq >= 3) return L('🔥 Você está pegando fogo! Cada acerto seguido vale <b>+200</b>.', '🔥 ¡Estás que ardes! Cada acierto seguido vale <b>+200</b>.');
+  if (seq > 0 && restantes >= 3 - seq) return L(`🔥 ${seq} acerto${pl} seguido${pl}! Mais ${3 - seq} e você ganha <b>+200</b>!`, `🔥 ¡${seq} acierto${pl} seguido${pl}! Con ${3 - seq} más ganas <b>+200</b>!`);
+  if (restantes >= 3) return L('🔥 Acerte <b>3 perguntas seguidas</b> e ganhe <b>+200 pontos</b> de bônus!', '🔥 ¡Acierta <b>3 preguntas seguidas</b> y gana <b>+200 puntos</b> de bono!');
+  return L('⏱ Acelere! O <b>tempo de resposta</b> muda sua pontuação. E a última vale o <b>DOBRO</b>!', '⏱ ¡Acelera! El <b>tiempo de respuesta</b> cambia tu puntaje. ¡Y la última vale el <b>DOBLE</b>!');
 }
 
 function playerGame(codigo, me) {
   let st = null, viewKey = '', enviando = null, minha = null, cdUlt = null;
+  botaoIdioma(() => { viewKey = ''; render(); });
 
   const render = () => {
     if (!st) return;
@@ -524,61 +564,61 @@ function playerGame(codigo, me) {
     if (st.status === 'lobby') {
       $app.innerHTML = `${head}<div class="full">
         <div class="pop">${brand()}</div>
-        <h2 class="rise" style="margin-top:24px">Olá, ${esc(st.nome)}! 👋</h2>
-        <p class="rise">Você está dentro. Aguarde o apresentador liberar a primeira pergunta.</p>
+        <h2 class="rise" style="margin-top:24px">${L('Olá', '¡Hola')}, ${esc(st.nome)}! 👋</h2>
+        <p class="rise">${L('Você está dentro. Aguarde o apresentador liberar a primeira pergunta.', 'Ya estás dentro. Espera a que el presentador libere la primera pregunta.')}</p>
         <p class="badge" id="njog"></p></div>`;
     } else if (st.status === 'pergunta' && prep) {
       cdUlt = null;
       $app.innerHTML = `${head}<div class="full">
-        ${st.bonus ? `<div class="bonusbar" style="font-size:20px">⚡ PERGUNTA BÔNUS<br>vale o DOBRO! ⚡</div>` : `<div class="badge">Pergunta ${st.idx + 1} de ${st.total}</div>`}
-        <h1 style="margin:16px 0">Prepare-se!</h1><div class="huge" id="cd"></div></div>`;
+        ${st.bonus ? `<div class="bonusbar" style="font-size:20px">${L('⚡ PERGUNTA BÔNUS<br>vale o DOBRO! ⚡', '⚡ PREGUNTA BONO<br>¡vale el DOBLE! ⚡')}</div>` : `<div class="badge">${L('Pergunta', 'Pregunta')} ${st.idx + 1} ${L('de', 'de')} ${st.total}</div>`}
+        <h1 style="margin:16px 0">${L('Prepare-se!', '¡Prepárate!')}</h1><div class="huge" id="cd"></div></div>`;
     } else if (st.status === 'pergunta' && !respondeu) {
-      const ops = st.pergunta.opcoes.map((o, i) =>
+      const ops = qOpcoes(st.pergunta).map((o, i) =>
         `<button class="opt o${i} pop" style="animation-delay:${i * .08}s" data-i="${i}"><span class="sh">${SHAPES[i]}</span><span>${esc(o)}</span></button>`).join('');
       $app.innerHTML = `<div class="wrap pl">
-        <div class="top"><span class="badge">${st.idx + 1}/${st.total}</span>${st.bonus ? '<span class="badge" style="background:var(--accent);color:#0b3d1c">⚡ BÔNUS x2</span>' : ''}<span class="badge" id="tl"></span></div>
+        <div class="top"><span class="badge">${st.idx + 1}/${st.total}</span>${st.bonus ? '<span class="badge" style="background:var(--accent);color:#0b3d1c">' + L('⚡ BÔNUS x2', '⚡ BONO x2') + '</span>' : ''}<span class="badge" id="tl" style="margin-right:120px"></span></div>
         <div class="bar"><i id="tb"></i></div>
-        <div class="pl-q">${esc(st.pergunta.texto)}</div>
+        <div class="pl-q">${esc(qTexto(st.pergunta))}</div>
         <div class="opts">${ops}</div></div>`;
       $app.querySelectorAll('.opt').forEach(b => b.onclick = () => responder(+b.dataset.i));
     } else if (st.status === 'pergunta') {
       const i = st.minha_opcao ?? minha;
       $app.innerHTML = `${head}<div class="full">
         ${i != null ? `<div class="opt o${i} pop" style="width:120px;height:120px;justify-content:center;font-size:56px">${SHAPES[i]}</div>` : ''}
-        <h1 style="margin-top:20px">Resposta enviada!</h1><p style="font-size:20px">Aguarde todos finalizarem… ⏳</p></div>`;
+        <h1 style="margin-top:20px">${L('Resposta enviada!', '¡Respuesta enviada!')}</h1><p style="font-size:20px">${L('Aguarde todos finalizarem… ⏳', 'Espera a que todos terminen… ⏳')}</p></div>`;
     } else if (st.status === 'resultado') {
       const ok = st.acertou === true, nao = st.acertou == null;
       $app.innerHTML = `${head}<div class="full ${ok ? 'res-ok' : 'res-bad'}">
         <div class="big pop">${ok ? '✔' : '✖'}</div>
-        <h1 class="pop" style="margin:12px 0;font-size:42px">${ok ? 'Acertou!' : nao ? 'Não respondeu' : 'Errou!'}</h1>
-        ${ok ? `<div class="badge pop" style="font-size:28px;animation-delay:.3s">+<span id="gan">0</span> pontos</div>` : ''}
-        ${ok && st.bonus ? `<p class="rise" style="margin:8px 0 0"><b>⚡ Pergunta bônus: pontos em dobro!</b></p>` : ''}
-        ${st.bonus_seq > 0 ? `<p class="rise" style="margin:8px 0 0;font-size:20px"><b>🔥 ${st.sequencia} acertos seguidos! +${st.bonus_seq} de bônus</b></p>` : ''}
-        ${!ok && st.correta != null ? `<p class="rise">Resposta certa: <b>${esc(st.pergunta.opcoes[st.correta])}</b></p>` : ''}
-        <p class="rise" style="font-size:22px;margin-top:24px;animation-delay:.5s">Você tem <b>${pts(st.pontos)} pontos</b></p>
-        ${st.bonus ? `<p class="rise" style="font-size:20px;animation-delay:.7s">🥁 O resultado sai no telão. Fique de olho!</p>` : `
+        <h1 class="pop" style="margin:12px 0;font-size:42px">${ok ? L('Acertou!', '¡Acertaste!') : nao ? L('Não respondeu', 'No respondiste') : L('Errou!', '¡Fallaste!')}</h1>
+        ${ok ? `<div class="badge pop" style="font-size:28px;animation-delay:.3s">+<span id="gan">0</span> ${L('pontos', 'puntos')}</div>` : ''}
+        ${ok && st.bonus ? `<p class="rise" style="margin:8px 0 0"><b>${L('⚡ Pergunta bônus: pontos em dobro!', '⚡ Pregunta bono: ¡puntos dobles!')}</b></p>` : ''}
+        ${st.bonus_seq > 0 ? `<p class="rise" style="margin:8px 0 0;font-size:20px"><b>${L(`🔥 ${st.sequencia} acertos seguidos! +${st.bonus_seq} de bônus`, `🔥 ¡${st.sequencia} aciertos seguidos! +${st.bonus_seq} de bono`)}</b></p>` : ''}
+        ${!ok && st.correta != null ? `<p class="rise">${L('Resposta certa', 'Respuesta correcta')}: <b>${esc(qOpcoes(st.pergunta)[st.correta])}</b></p>` : ''}
+        <p class="rise" style="font-size:22px;margin-top:24px;animation-delay:.5s">${L('Você tem', 'Tienes')} <b>${pts(st.pontos)} ${L('pontos', 'puntos')}</b></p>
+        ${st.bonus ? `<p class="rise" style="font-size:20px;animation-delay:.7s">${L('🥁 O resultado sai no telão. Fique de olho!', '🥁 El resultado sale en la pantalla. ¡Atento!')}</p>` : `
         <p class="rise" style="font-size:18px;background:rgba(0,0,0,.2);padding:10px 16px;border-radius:12px;animation-delay:.7s">${st.em_podio
-          ? '🏆 Você está no <b>pódio</b>! Não deixa escapar!'
-          : `🎯 Faltam <b>${pts(st.podio_diff)} pontos</b> para você entrar no <b>pódio</b>!`}</p>
+          ? L('🏆 Você está no <b>pódio</b>! Não deixa escapar!', '🏆 ¡Estás en el <b>podio</b>! ¡No lo dejes escapar!')
+          : L(`🎯 Faltam <b>${pts(st.podio_diff)} pontos</b> para você entrar no <b>pódio</b>!`, `🎯 ¡Te faltan <b>${pts(st.podio_diff)} puntos</b> para entrar al <b>podio</b>!`)}</p>
         <p class="rise" style="font-size:17px;margin:0;animation-delay:.9s">${dicaJogador(st)}</p>`}
-        <p class="small" style="opacity:.8">${st.bonus ? 'Aguarde o resultado final 🏆' : 'Aguarde a próxima pergunta'}</p></div>`;
+        <p class="small" style="opacity:.8">${st.bonus ? L('Aguarde o resultado final 🏆', 'Espera el resultado final 🏆') : L('Aguarde a próxima pergunta', 'Espera la próxima pregunta')}</p></div>`;
       if (ok) contar(document.getElementById('gan'), 0, st.ganhou, 1000);
     } else if (st.status === 'fim' && !(st.revelado >= 4)) {
       // suspense: a colocação só aparece depois que o telão revelar o pódio
       $app.innerHTML = `${head}<div class="full">
         <img src="img/tormentinha.png" alt="" style="width:170px;animation:bob 2.2s ease-in-out infinite">
-        <h1 class="pop" style="margin:16px 0;font-size:38px">Quiz finalizado! 🎉</h1>
-        <p class="rise" style="font-size:22px">👀 Olhe para o telão:<br>vamos revelar os vencedores!</p></div>`;
+        <h1 class="pop" style="margin:16px 0;font-size:38px">${L('Quiz finalizado! 🎉', '¡Quiz terminado! 🎉')}</h1>
+        <p class="rise" style="font-size:22px">${L('👀 Olhe para o telão:<br>vamos revelar os vencedores!', '👀 Mira la pantalla:<br>¡vamos a revelar a los ganadores!')}</p></div>`;
     } else if (st.status === 'fim') {
       const medal = ['🥇', '🥈', '🥉'][st.posicao - 1] || '🎉';
       $app.innerHTML = `${head}<div class="full">
         <div class="big pop">${medal}</div>
-        <h1 class="pop" style="margin:16px 0;font-size:40px">Quiz finalizado!<br>Parabéns!</h1>
-        ${st.posicao <= 3 ? '<img class="presente" src="img/presente.png" alt=""><p class="rise"><b>Você está no pódio!</b></p>' : ''}
-        <p class="rise" style="font-size:24px">Você ficou em <b>${st.posicao}º lugar</b></p>
-        <p class="rise">${pts(st.pontos)} pontos · acertou ${st.acertos} de ${st.total}</p>
+        <h1 class="pop" style="margin:16px 0;font-size:40px">${L('Quiz finalizado!<br>Parabéns!', '¡Quiz terminado!<br>¡Felicitaciones!')}</h1>
+        ${st.posicao <= 3 ? `<img class="presente" src="img/presente.png" alt=""><p class="rise"><b>${L('Você está no pódio!', '¡Estás en el podio!')}</b></p>` : ''}
+        <p class="rise" style="font-size:24px">${L('Você ficou em', 'Quedaste en el')} <b>${st.posicao}º ${L('lugar', 'puesto')}</b></p>
+        <p class="rise">${pts(st.pontos)} ${L('pontos · acertou', 'puntos · acertaste')} ${st.acertos} ${L('de', 'de')} ${st.total}</p>
         <div style="margin-top:24px;opacity:.85">${brand('sm')}</div>
-        <p class="small" style="opacity:.8">Obrigado por participar da SIPAT!</p></div>`;
+        <p class="small" style="opacity:.8">${L('Obrigado por participar da SIPAT!', '¡Gracias por participar de la SIPAT!')}</p></div>`;
       confete(5000);
     }
   };
@@ -598,15 +638,15 @@ function playerGame(codigo, me) {
       tl.textContent = Math.ceil(rest / 1000) + 's';
     }
     const nj = document.getElementById('njog');
-    if (nj) nj.textContent = st.jogadores + ' participantes na sala';
+    if (nj) nj.textContent = st.jogadores + L(' participantes na sala', ' participantes en la sala');
   };
 
   const responder = async i => {
     enviando = st.idx; minha = i; render();
     try {
       const r = await rpc('sipat_quiz_responder', { p_codigo: codigo, p_jogador: me.jogador_id, p_token: me.token, p_idx: st.idx, p_opcao: i });
-      if (r && r.ok === false) alert(r.motivo || 'Resposta não registrada');
-    } catch (e) { alert(e.message); }
+      if (r && r.ok === false) alert(r.motivo || L('Resposta não registrada', 'Respuesta no registrada'));
+    } catch (e) { alert(trErro(e.message)); }
   };
 
   poller(async () => {
@@ -861,18 +901,18 @@ function converter(rows) {
 
 // Dicas que o Tormentinha mostra na sala de espera
 const DICAS = [
-  'Bem-vindo à <b>SIPAT 2026</b>! Aponte a câmera para o QR code e entre no quiz! 📱',
-  'Quanto <b>mais rápido</b> você acertar, mais pontos ganha! ⚡',
-  'A <b>última pergunta vale o dobro</b>. Ninguém está eliminado até o fim! 🏆',
-  'Acertou <b>3 seguidas</b>? Você pega fogo e ganha <b>+200</b> de bônus! 🔥',
-  'Use sempre o <b>EPI</b> certo para cada atividade. 🦺',
-  'Viu uma condição insegura? <b>Comunique</b> o líder ou a CIPA na hora. 📣',
-  'Respeito é regra: <b>assédio não é brincadeira</b>. Denuncie pelo canal da empresa. 🤝',
-  'Antes de comprar, pergunte: <b>eu preciso disso?</b> Cuide do seu dinheiro. 💰',
-  'Movimente-se! A <b>ginástica laboral</b> previne lesões e dores. 🤸',
-  'Dormir bem também é <b>segurança</b>: cansaço causa acidentes. 😴',
-  'Cuide da mente: conversar sobre o que sente <b>faz bem</b>. 💚',
-  '<b>Cultura de segurança se planta todo dia.</b> 🌱',
+  bi('Bem-vindo à <b>SIPAT 2026</b>! Aponte a câmera para o QR code e entre no quiz! 📱', '¡Bienvenido a la SIPAT 2026! Apunta la cámara al código QR y entra al quiz.'),
+  bi('Quanto <b>mais rápido</b> você acertar, mais pontos ganha! ⚡', '¡Cuanto más rápido aciertes, más puntos ganas!'),
+  bi('A <b>última pergunta vale o dobro</b>. Ninguém está eliminado até o fim! 🏆', 'La última pregunta vale el doble. ¡Nadie está eliminado hasta el final!'),
+  bi('Acertou <b>3 seguidas</b>? Você pega fogo e ganha <b>+200</b> de bônus! 🔥', '¿Acertaste 3 seguidas? ¡Ganas +200 de bono!'),
+  bi('Use sempre o <b>EPI</b> certo para cada atividade. 🦺', 'Usa siempre el EPP correcto para cada actividad.'),
+  bi('Viu uma condição insegura? <b>Comunique</b> o gestor ou a CIPA na hora. 📣', '¿Viste una condición insegura? Avisa al gestor o a la CIPA de inmediato.'),
+  bi('Respeito é regra: <b>assédio não é brincadeira</b>. Denuncie pelo canal da empresa. 🤝', 'El respeto es regla: el acoso no es broma. Denuncia por el canal de la empresa.'),
+  bi('Antes de comprar, pergunte: <b>eu preciso disso?</b> Cuide do seu dinheiro. 💰', 'Antes de comprar, pregúntate: ¿lo necesito? Cuida tu dinero.'),
+  bi('Movimente-se! A <b>ginástica laboral</b> previne lesões e dores. 🤸', '¡Muévete! La gimnasia laboral previene lesiones y dolores.'),
+  bi('Dormir bem também é <b>segurança</b>: cansaço causa acidentes. 😴', 'Dormir bien también es seguridad: el cansancio causa accidentes.'),
+  bi('Cuide da mente: conversar sobre o que sente <b>faz bem</b>. 💚', 'Cuida tu mente: hablar de lo que sientes hace bien.'),
+  bi('<b>Cultura de segurança se planta todo dia.</b> 🌱', 'La cultura de seguridad se siembra todos los días.'),
 ];
 
 const MODELO = [
@@ -962,7 +1002,7 @@ async function hostGame(codigo) {
   };
 
   const opcoesHtml = (q, mostrarCerta) => `<div class="opts">${q.opcoes.map((o, i) =>
-    `<div class="opt o${i} ${mostrarCerta ? (i === q.correta ? 'right' : 'fade') : 'pop'}" style="animation-delay:${i * .1}s"><span class="sh">${SHAPES[i]}</span><span>${esc(o)}</span>${mostrarCerta && i === q.correta ? '<span style="margin-left:auto">✔</span>' : ''}</div>`).join('')}</div>`;
+    `<div class="opt o${i} ${mostrarCerta ? (i === q.correta ? 'right' : 'fade') : 'pop'}" style="animation-delay:${i * .1}s"><span class="sh">${SHAPES[i]}</span><span>${esc(o)}${q.opcoes_es && q.opcoes_es[i] ? `<span class="oes">${esc(q.opcoes_es[i])}</span>` : ''}</span>${mostrarCerta && i === q.correta ? '<span style="margin-left:auto">✔</span>' : ''}</div>`).join('')}</div>`;
 
   const masc = (fala, cls = '') => `<div class="masc ${cls}"><img src="img/tormentinha.png" alt="Tormentinha"><div class="fala">${fala}</div></div>`;
   const selo = ''; // a marca SIPAT fica no cabeçalho
@@ -970,16 +1010,16 @@ async function hostGame(codigo) {
   // Frase do Tormentinha no ranking
   const falaRanking = () => {
     const r = st.ranking, lider = r[0];
-    if (!lider || !lider.pontos) return 'Ninguém pontuou ainda… bora acelerar! ⚡';
-    if (st.idx === 0) return `<b>${esc(lider.nome)}</b> saiu na frente! 🚀`;
-    if (lider.pos_ant !== 1) return `Virada! <b>${esc(lider.nome)}</b> assumiu a liderança! 🚀`;
+    if (!lider || !lider.pontos) return bi('Ninguém pontuou ainda… bora acelerar! ⚡', 'Nadie ha sumado puntos todavía… ¡a acelerar!');
+    if (st.idx === 0) return bi(`<b>${esc(lider.nome)}</b> saiu na frente! 🚀`, `¡${esc(lider.nome)} salió adelante!`);
+    if (lider.pos_ant !== 1) return bi(`Virada! <b>${esc(lider.nome)}</b> assumiu a liderança! 🚀`, `¡Remontada! ${esc(lider.nome)} tomó el liderato.`);
     // muita gente em sequência: anuncia o total em vez de uma lista enorme de nomes
     const fg = st.fogo || { total: 0, nomes: [] };
-    if (fg.total >= 3) return `🔥 <b>${fg.total} pessoas</b> estão pegando fogo! (3+ acertos seguidos = +200)`;
-    if (fg.total > 0) return `🔥 <b>${fg.nomes.map(esc).join('</b> e <b>')}</b> ${fg.total > 1 ? 'estão' : 'está'} pegando fogo! +200 de bônus`;
+    if (fg.total >= 3) return bi(`🔥 <b>${fg.total} pessoas</b> estão pegando fogo! (3+ acertos seguidos = +200)`, `¡${fg.total} personas están que arden! (3+ aciertos seguidos = +200)`);
+    if (fg.total > 0) return bi(`🔥 <b>${fg.nomes.map(esc).join('</b> e <b>')}</b> ${fg.total > 1 ? 'estão' : 'está'} pegando fogo! +200 de bônus`, `¡${fg.nomes.map(esc).join(' y ')} ${fg.total > 1 ? 'están' : 'está'} que arde${fg.total > 1 ? 'n' : ''}! +200 de bono`);
     const sub = r.filter(x => x.pos_ant - x.pos >= 2).sort((a, b) => (b.pos_ant - b.pos) - (a.pos_ant - a.pos))[0];
-    if (sub) return `<b>${esc(sub.nome)}</b> subiu ${sub.pos_ant - sub.pos} posições! 📈`;
-    return `<b>${esc(lider.nome)}</b> segue na liderança! 👑`;
+    if (sub) return bi(`<b>${esc(sub.nome)}</b> subiu ${sub.pos_ant - sub.pos} posições! 📈`, `¡${esc(sub.nome)} subió ${sub.pos_ant - sub.pos} posiciones!`);
+    return bi(`<b>${esc(lider.nome)}</b> segue na liderança! 👑`, `¡${esc(lider.nome)} sigue en el liderato!`);
   };
 
   // Gráfico de rosca: acertos x erros x não responderam
@@ -1070,14 +1110,14 @@ async function hostGame(codigo) {
     } else if (st.status === 'pergunta' && prep) {
       $app.innerHTML = `<div class="wrap">${topo}<div class="center" style="min-height:75vh">
         ${st.bonus ? `<div class="bonusbar pop">⚡ PERGUNTA BÔNUS — vale o DOBRO! ⚡</div>` : `<div class="badge">Pergunta ${st.idx + 1} de ${st.total}</div>`}
-        <div class="qtext pop" style="margin-top:20px;max-width:1100px">${esc(st.pergunta.texto)}</div>
+        <div class="qtext pop" style="margin-top:20px;max-width:1100px">${esc(st.pergunta.texto)}${st.pergunta.texto_es ? `<span class="qes">${esc(st.pergunta.texto_es)}</span>` : ''}</div>
         <div class="huge" id="cd"></div><p style="font-size:22px">Prepare-se!</p></div></div>`;
       if (st.bonus) bipe(1320, .3);
     } else if (st.status === 'pergunta') {
       // Tela 3: pergunta, cronômetro e quantos já responderam
       $app.innerHTML = `<div class="wrap">${topo}
         ${st.bonus ? `<div style="text-align:center;margin-bottom:10px"><div class="bonusbar">⚡ PERGUNTA BÔNUS — vale o DOBRO! ⚡</div></div>` : ''}
-        <div class="qtext">${esc(st.pergunta.texto)}</div>
+        <div class="qtext">${esc(st.pergunta.texto)}${st.pergunta.texto_es ? `<span class="qes">${esc(st.pergunta.texto_es)}</span>` : ''}</div>
         <div class="mid">
           <div class="ring" id="ring"><svg width="150" height="150"><circle cx="75" cy="75" r="64" stroke="rgba(255,255,255,.2)" stroke-width="12" fill="none"/>
             <circle class="fg" id="arc" cx="75" cy="75" r="64" stroke="var(--accent)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="0"/></svg><b id="tm"></b></div>
@@ -1089,10 +1129,10 @@ async function hostGame(codigo) {
       // Tela 4a: a pergunta com a resposta certa
       const c = st.pergunta.correta;
       $app.innerHTML = `<div class="wrap">${topo}
-        <div class="qtext">${esc(st.pergunta.texto)}</div>
+        <div class="qtext">${esc(st.pergunta.texto)}${st.pergunta.texto_es ? `<span class="qes">${esc(st.pergunta.texto_es)}</span>` : ''}</div>
         ${opcoesHtml(st.pergunta, true)}
         <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:16px;flex-wrap:wrap">
-          ${masc(`A resposta certa é a <b>letra ${LETRAS[c]}</b>! ✅`)}
+          ${masc(bi(`A resposta certa é a <b>letra ${LETRAS[c]}</b>! ✅`, `¡La respuesta correcta es la letra ${LETRAS[c]}!`))}
           <div class="actions" style="margin:0"><button class="btn go" style="font-size:22px" onclick="__tela('stats')">Ver estatísticas 📊</button></div></div></div>${selo}`;
       bipe(1046, .25);
     } else if (st.status === 'resultado' && tela === 'stats') {
@@ -1103,7 +1143,12 @@ async function hostGame(codigo) {
       // Na última pergunta não mostramos nomes nem ranking: o resultado é revelado no pódio
       const ultima = st.idx + 1 >= st.total;
       const segredo = '🤫 só no pódio!';
-      const fala = ultima ? 'Última pergunta encerrada! Quem será o grande <b>campeão</b>? 🥁' : !st.jogadores ? 'Cadê a galera? 😅' : taxa >= .8 ? 'Mandaram muito bem, galera! 👏' : taxa >= .5 ? 'Boa! A maioria acertou! 💪' : taxa > 0 ? 'Essa foi difícil, hein? 🤔' : 'Ninguém acertou! Presta atenção na palestra! 😱';
+      const fala = ultima ? bi('Última pergunta encerrada! Quem será o grande <b>campeão</b>? 🥁', '¡Última pregunta cerrada! ¿Quién será el gran campeón?')
+        : !st.jogadores ? bi('Cadê a galera? 😅', '¿Dónde está la gente?')
+        : taxa >= .8 ? bi('Mandaram muito bem, galera! 👏', '¡Lo hicieron muy bien!')
+        : taxa >= .5 ? bi('Boa! A maioria acertou! 💪', '¡Bien! La mayoría acertó.')
+        : taxa > 0 ? bi('Essa foi difícil, hein? 🤔', 'Esta fue difícil, ¿eh?')
+        : bi('Ninguém acertou! Presta atenção na palestra! 😱', '¡Nadie acertó! Presten atención a la charla.');
       $app.innerHTML = `<div class="wrap">${topo}
         <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px">
           <h1 class="pop" style="font-size:46px;margin:0">📊 Como a galera foi</h1>${masc(fala)}</div>
@@ -1153,7 +1198,7 @@ async function hostGame(codigo) {
       if (rv === 0) {
         corpo = `<div class="center" style="min-height:70vh">
           <h1 class="pop" style="font-size:64px">Quiz finalizado! 🎉</h1>
-          ${masc('Rufem os tambores… 🥁<br>Vamos conhecer os <b>grandes vencedores</b>!', 'big')}
+          ${masc(bi('Rufem os tambores… 🥁<br>Vamos conhecer os <b>grandes vencedores</b>!', '¡Redoble de tambores! Vamos a conocer a los grandes ganadores.'), 'big')}
           <div class="actions">${btn('Revelar o 3º lugar 🥉')}</div></div>`;
       } else if (rv <= 3) {
         // Pódio sendo montado: o novo colocado aparece grande ("Parabéns!"), encolhe e desce para o seu degrau
@@ -1168,7 +1213,7 @@ async function hostGame(codigo) {
         const prox = rv === 1 ? 'Revelar o 2º lugar 🥈' : rv === 2 ? 'Revelar o CAMPEÃO 🏆' : 'Ver classificação completa 📋';
         corpo = `<h1 class="pop" style="text-align:center;font-size:48px;margin:6px 0">🏆 Os vencedores</h1>
           <div class="stage">${[2, 1, 3].map(slot).join('')}</div>
-          ${rv === 3 ? `<div id="fala1" style="display:flex;justify-content:center;margin-top:14px;${animar ? 'visibility:hidden' : ''}">${masc(`Parabéns, <b>${cl[0] ? esc(cl[0].nome) : ''}</b>! Você é o campeão! 🏆`)}</div>` : ''}
+          ${rv === 3 ? `<div id="fala1" style="display:flex;justify-content:center;margin-top:14px;${animar ? 'visibility:hidden' : ''}">${masc(bi(`Parabéns, <b>${cl[0] ? esc(cl[0].nome) : ''}</b>! Você é o campeão! 🏆`, `¡Felicitaciones, ${cl[0] ? esc(cl[0].nome) : ''}! ¡Eres el campeón!`))}</div>` : ''}
           <div class="actions">${btn(prox, rv === 3 ? 'light' : 'go')}</div>
           ${animar ? `<div class="spot" id="spot">${card(novo)}<div class="parab">Parabéns! 👏</div></div>` : ''}`;
       } else {
