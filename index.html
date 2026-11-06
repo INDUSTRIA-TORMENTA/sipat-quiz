@@ -729,7 +729,7 @@ async function adminGeral(senha) {
       ${rk.length ? `<div class="mini">${card(1)}${card(2)}${card(3)}</div>
       <div class="tabgeral"><table class="geral"><thead><tr><th>Pos.</th><th>Nome</th>
         ${pal.map(p => `<th title="${esc(p.titulo)}">${esc(nomeCurto(p.titulo))}<button data-zp="${p.id}">zerar só esta</button></th>`).join('')}<th>Total</th></tr></thead>
-        <tbody>${rk.map(x => `<tr class="${x.pos <= 3 ? 'top3' : ''}"><td><b>${x.pos}º</b></td><td class="nome">${esc(x.nome)}</td>
+        <tbody>${rk.map(x => `<tr class="${x.pos <= 3 ? 'top3' : ''}"><td><b>${x.pos}º</b></td><td class="nome">${esc(x.nome)}${x.ajuste ? `<small style="display:block;font-size:12px;opacity:.75">⚠ ${esc(x.ajuste)}</small>` : ''}</td>
           ${pal.map(p => x.por[p.id] == null ? '<td class="zero">—</td>' : `<td>${pts(x.por[p.id])}</td>`).join('')}<td>${pts(x.total)}</td></tr>`).join('')}</tbody></table></div>`
       : `<div class="card" style="margin:30px auto;text-align:center"><h2>Ainda não há pontos</h2>
           <p>Cada quiz que chegar ao fim entra aqui automaticamente.</p></div>`}
@@ -749,8 +749,8 @@ async function adminGeral(senha) {
     });
     document.getElementById('xls').onclick = async () => {
       await loadXlsx();
-      const linhas = [['Posição', 'Nome', ...pal.map(p => p.titulo), 'Total', 'Acertos']]
-        .concat(rk.map(x => [x.pos, x.nome, ...pal.map(p => x.por[p.id] ?? ''), x.total, x.acertos]));
+      const linhas = [['Posição', 'Nome', ...pal.map(p => p.titulo), 'Total', 'Acertos', 'Ajuste']]
+        .concat(rk.map(x => [x.pos, x.nome, ...pal.map(p => x.por[p.id] ?? ''), x.total, x.acertos, x.ajuste || '']));
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(linhas), 'Ranking geral');
       XLSX.writeFile(wb, 'ranking-geral-sipat-2026.xlsx');
